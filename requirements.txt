@@ -1,0 +1,7 @@
+SQLAlchemy
+aiogram
+alembic
+python-dotenv
+pydantic
+psycopg2
+loguru

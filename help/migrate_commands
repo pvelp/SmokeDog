@@ -1,0 +1,3 @@
+migrations:
+    create revision -    alembic revision --message="message" --autogenerate
+    commit revision -    alembic upgrade head

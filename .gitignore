@@ -1,0 +1,7 @@
+venv
+.env
+*cache*
+*idea*
+alembic/versions/*
+.DS_Store
+*.db
