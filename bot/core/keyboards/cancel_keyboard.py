@@ -27,4 +27,3 @@ def cancel_or_miss():
     btn = KeyboardButton(CancelBtnName.cancel_btn)
     kb.add(btn)
     return kb
-

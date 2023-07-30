@@ -3,6 +3,7 @@ aiogram
 alembic
 python-dotenv
 pydantic
+pydantic_settings
 psycopg2
 loguru
 pymongo
