@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from loguru import logger
 
 from base.db_connection import get_session
@@ -15,7 +17,7 @@ def add_new_client(client: ClientModel):
             logger.critical(e)
 
 
-def get_client_by_id(telegram_id: str) -> ClientModel | None:
+def get_client_by_tg_id(telegram_id: str) -> ClientModel | None:
     with get_session() as session:
         client = session.query(Client).filter(
             Client.telegram_id == telegram_id
@@ -27,3 +29,14 @@ def get_client_by_id(telegram_id: str) -> ClientModel | None:
 
         client_model = ClientModel(**client.as_dict())
         return client_model
+
+
+def delete_user_by_tg_id(telegram_id: str):
+    with get_session() as session:
+        client = session.query(Client).filter(
+            Client.telegram_id == telegram_id
+        ).first()
+
+        if client is not None:
+            session.delete(client)
+            session.commit()
