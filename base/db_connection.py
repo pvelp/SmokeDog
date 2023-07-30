@@ -1,7 +1,8 @@
 from contextlib import contextmanager
+
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.engine import Engine
+from sqlalchemy.orm import Session, sessionmaker
 
 
 def set_settings_file_for_db(settings):

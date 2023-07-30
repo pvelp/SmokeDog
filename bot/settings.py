@@ -2,8 +2,8 @@ from pydantic import BaseSettings, Field
 
 
 class Settings(BaseSettings):
-    db_url: str = Field(..., env='DB_URL')
-    token: str = Field(..., env='TOKEN')
+    db_url: str = Field(..., env="DB_URL")
+    token: str = Field(..., env="TOKEN")
 
     class Config:
         env_file = ".env"

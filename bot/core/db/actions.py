@@ -1,0 +1,29 @@
+from loguru import logger
+
+from base.db_connection import get_session
+from base.db_models.models import Client
+from bot.core.models import ClientModel
+
+
+def add_new_client(client: ClientModel):
+    with get_session() as session:
+        try:
+            client = Client(**(client.dict()))
+            session.add(client)
+            session.commit()
+        except Exception as e:
+            logger.critical(e)
+
+
+def get_client_by_id(telegram_id: str) -> ClientModel | None:
+    with get_session() as session:
+        client = session.query(Client).filter(
+            Client.telegram_id == telegram_id
+        ).first()
+
+        if client is None:
+            logger.error(f"Client with telegram id = {telegram_id} was not found in DB")
+            return None
+
+        client_model = ClientModel(**client.as_dict())
+        return client_model

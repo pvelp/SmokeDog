@@ -5,3 +5,5 @@ python-dotenv
 pydantic
 psycopg2
 loguru
+pymongo
+motor
