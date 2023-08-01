@@ -10,5 +10,4 @@ DefaultButtons = [DefaultKeyboardBtnName.registration, DefaultKeyboardBtnName.in
 
 
 def default_kb():
-    kb = create_buttons(DefaultButtons)
-    return kb
+    return create_buttons(DefaultButtons)

@@ -14,7 +14,7 @@ class Client(Base):
     username = Column(Text(), nullable=False)
     phone = Column(Text(), nullable=False)
     birthday = Column(Text(), nullable=False)
-    last_visit = Column(Text(), nullable=False)
+    # last_visit = Column(Text())
     is_banned = Column(Boolean(), nullable=False)
 
     def __repr__(self):

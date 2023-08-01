@@ -40,3 +40,17 @@ def delete_user_by_tg_id(telegram_id: str):
         if client is not None:
             session.delete(client)
             session.commit()
+
+
+def add_client(data):
+    with get_session() as session:
+        client = Client(
+            telegram_id=data.get("telegram_id"),
+            name=data.get("name"),
+            username=data.get("nickname"),
+            phone=data.get("phone"),
+            birthday=data.get("bday"),
+            is_banned=False
+        )
+        session.add(client)
+        session.commit()
