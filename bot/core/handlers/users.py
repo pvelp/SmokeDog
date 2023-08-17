@@ -1,41 +1,39 @@
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
-from bot.core.keyboards.utils import create_buttons
 from bot.core.keyboards.cancel_keyboard import cancel, cancel_send_phone, CancelBtnName
 from bot.core.db.actions import get_client_by_tg_id, add_client
 from bot.core.states.user_state import UserState, Registration
 from bot.core.keyboards.default_keyboard import default_kb
-from bot.core.keyboards.user_keyboard import main_menu_kb, MainMenuBtnName
+from bot.core.keyboards.user_keyboard import main_menu_kb, MainMenuBtnName, loyalty_kb, LoyaltyProgramBtnName
 from bot.config import bot
 
 
 async def start_command(message: types.Message):
     user = get_client_by_tg_id(message.from_user.id)
     if user is None:
-        kb = create_buttons(["Зарегистрироваться"])
-        await message.answer("Пройдите регистрацию", reply_markup=kb)
-        await UserState.sign_up.set()
+        await message.answer("Вы можете зарегестрироваться в программе лояльности", reply_markup=main_menu_kb())
     else:
-        await message.answer("Рады снова вас видеть")
+        await message.answer("Рады снова вас видеть", reply_markup=main_menu_kb())
+    await UserState.start.set()
 
 
 async def sign_up_start_stage(message: types.Message):
     msg = message.text
-    if msg == "Зарегистрироваться":
+    if msg == LoyaltyProgramBtnName.registration:
         await message.answer("*Шаг [1/3]*\nВведите вашe имя",
                              reply_markup=cancel(),
                              parse_mode="Markdown")
         await Registration.name_stage.set()
     elif msg == CancelBtnName.cancel_btn:
-        await message.answer("Вы отменили регистрацию",  reply_markup=default_kb())
-        await UserState.default_state.set()
+        await message.answer("Вы отменили регистрацию",  reply_markup=main_menu_kb())
+        await UserState.start.set()
 
 
 async def sign_up_name_stage(message: types.Message, state: FSMContext):
     msg = message.text
     if msg == CancelBtnName.cancel_btn:
-        await message.answer("Вы отменили регистрацию", reply_markup=default_kb())
-        await UserState.default_state.set()
+        await message.answer("Вы отменили регистрацию",  reply_markup=main_menu_kb())
+        await UserState.start.set()
         await state.reset_data()
     else:
         await message.answer("*Шаг [2/3]*\nВведите дату вашего рождения",
@@ -50,8 +48,8 @@ async def sign_up_name_stage(message: types.Message, state: FSMContext):
 async def sign_up_bday_stage(message: types.Message, state: FSMContext):
     msg = message.text
     if msg == CancelBtnName.cancel_btn:
-        await message.answer("Вы отменили регистрацию", reply_markup=default_kb())
-        await UserState.default_state.set()
+        await message.answer("Вы отменили регистрацию",  reply_markup=main_menu_kb())
+        await UserState.start.set()
         await state.reset_data()
     else:
         await message.answer("*Шаг [3/3]*\nПоделитесь номером телефона",
@@ -64,8 +62,8 @@ async def sign_up_bday_stage(message: types.Message, state: FSMContext):
 async def cancel_sign_up_phone_stage(message: types.Message, state: FSMContext):
     msg = message.text
     if msg == CancelBtnName.cancel_btn:
-        await message.answer("Вы отменили регистрацию", reply_markup=default_kb())
-        await UserState.default_state.set()
+        await message.answer("Вы отменили регистрацию",  reply_markup=main_menu_kb())
+        await UserState.start.set()
         await state.reset_data()
 
 
@@ -74,28 +72,32 @@ async def sign_up_phone_stage(message: types.Message, state: FSMContext):
     await message.answer("Вы прошли регистрацию", reply_markup=main_menu_kb())
     await UserState.start.set()
     data = await state.get_data()
-    add_client(data)
+    try:
+        add_client(data)
+    except Exception as e:
+        print(f"Error on adding new client {e}")
     await state.reset_data()
 
 
 async def main_menu_handler(message: types.Message):
     msg = message.text
     if msg == MainMenuBtnName.menu:
-        pass
+        await message.answer("Меню", reply_markup=main_menu_kb())
     elif msg == MainMenuBtnName.tips:
-        pass
+        await message.answer("Чаевые", reply_markup=main_menu_kb())
     elif msg == MainMenuBtnName.sales:
-        pass
+        await message.answer("Акции", reply_markup=main_menu_kb())
     elif msg == MainMenuBtnName.events:
-        pass
+        await message.answer("Афмша", reply_markup=main_menu_kb())
     elif msg == MainMenuBtnName.photos:
-        pass
+        await message.answer("Фотоотчет", reply_markup=main_menu_kb())
     elif msg == MainMenuBtnName.contacts:
-        pass
+        await message.answer("Контакты", reply_markup=main_menu_kb())
     elif msg == MainMenuBtnName.feedback:
-        pass
+        await message.answer("Оставить отзыв", reply_markup=main_menu_kb())
     elif msg == MainMenuBtnName.loyalty_program:
-        pass
+        await message.answer("Программа лояльности", reply_markup=loyalty_kb())
+        await UserState.loaylty.set()
 
 
 def register_users_handlers(dp: Dispatcher):

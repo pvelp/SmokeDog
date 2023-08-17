@@ -8,6 +8,6 @@ class ClientModel(BaseModel):
     name: str
     username: str
     phone: str
-    birthday: datetime.date
+    birthday: str
     is_banned: bool
     # last_visit: datetime.date
