@@ -1,10 +1,11 @@
-SQLAlchemy
-aiogram
-alembic
+SQLAlchemy~=2.0.17
+aiogram~=2.25.1
+alembic~=1.11.1
 python-dotenv
-pydantic
+pydantic~=2.1.1
 pydantic_settings
 psycopg2
-loguru
+loguru~=0.7.0
 pymongo
 motor
+requests~=2.31.0

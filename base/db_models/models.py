@@ -18,4 +18,4 @@ class Client(Base):
     is_banned = Column(Boolean(), nullable=False)
 
     def __repr__(self):
-        return f"<Client(fio='{self.name} {self.surname}', phone={self.phone}, telegram_id='{self.telegram_id}'"
+        return f"<Client(fio='{self.name} {self.username}', phone={self.phone}, telegram_id='{self.telegram_id}'"
