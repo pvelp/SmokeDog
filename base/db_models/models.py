@@ -9,13 +9,13 @@ class Client(Base):
     __tablename__ = "users"
 
     id = Column(Integer(), primary_key=True)
-    telegram_id = Column(Text(), nullable=False, unique=True)
-    name = Column(Text(), nullable=False)
-    username = Column(Text(), nullable=False)
-    phone = Column(Text(), nullable=False)
-    birthday = Column(Text(), nullable=False)
-    # last_visit = Column(Text())
-    is_banned = Column(Boolean(), nullable=False)
+    telegram_id = Column(Text(), unique=True, nullable=False)
+    name = Column(Text())
+    username = Column(Text())
+    phone = Column(Text())
+    birthday = Column(Text())
+    is_banned = Column(Boolean())
+    prime_hill_card = Column(Text(), unique=True)
 
     def __repr__(self):
         return f"<Client(fio='{self.name} {self.username}', phone={self.phone}, telegram_id='{self.telegram_id}'"

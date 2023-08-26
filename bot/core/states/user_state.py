@@ -10,5 +10,10 @@ class UserState(StatesGroup):
 
 class Registration(StatesGroup):
     name_stage = State()
+    surname_stage = State()
+    patronymic_stage = State()
+    email_stage = State()
     birthday_stage = State()
     phone_stage = State()
+    sex_stage = State()
+

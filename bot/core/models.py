@@ -10,4 +10,14 @@ class ClientModel(BaseModel):
     phone: str
     birthday: str
     is_banned: bool
-    # last_visit: datetime.date
+    card_hash: str
+
+
+class PrimeHillModel(BaseModel):
+    lastName: str
+    firstName: str
+    patronymic: str
+    birthday: str
+    sex: bool
+    email: str
+    phone: str

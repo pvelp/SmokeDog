@@ -1,5 +1,6 @@
 import requests
 from bot.settings import settings
+from bot.core.models import PrimeHillModel
 
 params = {'token': settings.prime_hill_token}
 
@@ -14,18 +15,19 @@ def get_templates():
     return requests.get(url, params)
 
 
-def create_client():
+def create_client(client: PrimeHillModel):
+    # client.json()
     url = "https://open-api.p-h.app/api/v2/createClients"
     body = {
         "clients": [
             {
-                "lastName": "Чехов",
-                "firstName": "Антон",
-                "patronymic": "Павлович",
-                "birthday": "2020-01-01",
-                "sex": "1",
-                "email": "info@prime-hill.com",
-                "phone": "79777121350",
+                "lastName": client.lastName,
+                "firstName": client.firstName,
+                "patronymic": client.patronymic,
+                "birthday": client.birthday,
+                "sex": client.sex,
+                "email": client.email,
+                "phone": client.phone,
                 "templateId": 9588,
                 "cardNumber": "1234",
                 "cardBarcode": "1234",

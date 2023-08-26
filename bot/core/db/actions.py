@@ -50,7 +50,8 @@ def add_client(data):
             username=data.get("nickname"),
             phone=data.get("phone"),
             birthday=data.get("bday"),
-            is_banned=False
+            is_banned=False,
+            prime_hill_card=data.get("prime_hill_card")
         )
         session.add(client)
         session.commit()
