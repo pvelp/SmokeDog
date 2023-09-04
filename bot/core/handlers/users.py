@@ -1,8 +1,8 @@
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 
-from bot.core.db.actions import get_client_by_tg_id, add_client, add_new_client
-from bot.core.models import ClientModel, PrimeHillModel
+from bot.core.db.actions import get_client_by_tg_id, add_client
+from bot.core.models import PrimeHillModel
 from bot.core.keyboards.cancel_keyboard import cancel, cancel_send_phone, CancelBtnName
 from bot.core.keyboards.user_keyboard import (
     main_menu_kb,
@@ -162,15 +162,6 @@ async def sign_up_email_stage(message: types.Message, state: FSMContext):
             prime_hill_card = create_client(prime_hill_client)
             await state.update_data(prime_hill_card=prime_hill_card)
             add_client(data)
-            # user = ClientModel(
-            #     telegram_id=data.get("telegram_id"),
-            #     name=data.get("name"),
-            #     username=data.get("nickname"),
-            #     phone=data.get("phone"),
-            #     birthday=data.get("dbay"),
-            #     is_banned=False,
-            #     card=prime_hill_card
-            # )
             await message.answer(
                 f"Вы успешно прошли регистрацию, вот ваша карта: {prime_hill_card}",
             )

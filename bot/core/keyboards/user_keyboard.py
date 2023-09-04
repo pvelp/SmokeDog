@@ -26,10 +26,6 @@ class GenderBtnName:
 def get_gender(text: GenderBtnName):
     return 1 if text == GenderBtnName.male else 0
 
-# class Gender(Enum):
-#     GenderBtnName.female = 0
-#     GenderBtnName.male = 1
-
 
 main_menu_btns = [
     MainMenuBtnName.loyalty_program,
