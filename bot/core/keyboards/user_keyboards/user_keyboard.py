@@ -1,6 +1,6 @@
-from enum import Enum
+from bot.core.consts import TIPS_URL
 from bot.core.keyboards.cancel_keyboard import CancelBtnName
-from bot.core.keyboards.utils import create_buttons
+from bot.core.keyboards.utils import create_buttons, create_inline_buttons
 
 
 class MainMenuBtnName:
@@ -28,7 +28,7 @@ def get_gender(text: GenderBtnName):
 
 
 main_menu_btns = [
-    MainMenuBtnName.loyalty_program,
+    # MainMenuBtnName.loyalty_program,
     MainMenuBtnName.menu,
     MainMenuBtnName.tips,
     MainMenuBtnName.sales,
@@ -49,7 +49,10 @@ loyalty_program_btns = [LoyaltyProgramBtnName.registration, CancelBtnName.cancel
 
 
 def main_menu_kb():
-    return create_buttons(main_menu_btns)
+    return create_buttons(main_menu_btns,
+                          {
+                              MainMenuBtnName.tips: TIPS_URL
+                          })
 
 
 def loyalty_kb():
@@ -58,3 +61,7 @@ def loyalty_kb():
 
 def gender_kb():
     return create_buttons(gender_menu_btns)
+
+
+def choose_weekend_day_kb():
+    return create_inline_buttons(["Пятница", "Суббота"])

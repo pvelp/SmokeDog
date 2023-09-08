@@ -10,12 +10,11 @@ class Client(Base):
 
     id = Column(Integer(), primary_key=True)
     telegram_id = Column(Text(), unique=True, nullable=False)
-    name = Column(Text())
-    username = Column(Text())
-    phone = Column(Text())
-    birthday = Column(Text())
-    is_banned = Column(Boolean())
-    prime_hill_card = Column(Text(), unique=True)
+    name = Column(Text(), nullable=True)
+    username = Column(Text(), nullable=True)
+    phone = Column(Text(), nullable=True)
+    birthday = Column(Text(), nullable=True)
+    is_banned = Column(Boolean(), nullable=True)
 
     def __repr__(self):
         return f"<Client(fio='{self.name} {self.username}', phone={self.phone}, telegram_id='{self.telegram_id}'"

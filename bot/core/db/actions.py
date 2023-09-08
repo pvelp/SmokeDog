@@ -4,7 +4,7 @@ from loguru import logger
 
 from base.db_connection import get_session
 from base.db_models.models import Client
-from bot.core.models import ClientModel
+from bot.core.models import ClientModel, StartClientModel
 
 
 def add_base_client(telegram_id: str):
@@ -35,9 +35,27 @@ def get_client_by_tg_id(telegram_id: str) -> ClientModel | None:
         if client is None:
             logger.error(f"Client with telegram id = {telegram_id} was not found in DB")
             return None
-
-        client_model = ClientModel(**client.as_dict())
+        client_model = ClientModel(
+            telegram_id=client.telegram_id,
+            id=client.id,
+            name=client.name,
+            username=client.username,
+            phone=client.phone,
+            birthday=client.birthday,
+            is_banned=client.is_banned
+        )
+        # client_model = ClientModel(**client.as_dict())
         return client_model
+
+
+def get_start_client_by_tg_id(telegram_id: str) -> StartClientModel | None:
+    with get_session() as session:
+        client = session.query(Client).filter(Client.telegram_id == telegram_id).first()
+        if client is None:
+            logger.error(f"Client with telegram id = {telegram_id} was not found in DB")
+            return None
+        start_client_model = StartClientModel(**client.as_dict())
+        return start_client_model
 
 
 def delete_user_by_tg_id(telegram_id: str):

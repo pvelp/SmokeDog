@@ -6,6 +6,7 @@ class UserState(StatesGroup):
     start = State()
     sign_up = State()
     loaylty = State()
+    choose_day = State()
 
 
 class Registration(StatesGroup):
