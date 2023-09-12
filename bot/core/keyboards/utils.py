@@ -13,8 +13,11 @@ def create_buttons(text: list, web_app_btns: dict[str, str] = None) -> ReplyKeyb
     kb = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False, row_width=2)
     buttons = []
     for i in range(len(text)):
-        if text[i] in web_app_btns.keys():
-            btn = KeyboardButton(text[i], web_app=WebAppInfo(url=web_app_btns.get(text[i])))
+        if web_app_btns is not None:
+            if text[i] in web_app_btns.keys():
+                btn = KeyboardButton(text[i], web_app=WebAppInfo(url=web_app_btns.get(text[i])))
+            else:
+                btn = KeyboardButton(text[i])
         else:
             btn = KeyboardButton(text[i])
         buttons.append(btn)

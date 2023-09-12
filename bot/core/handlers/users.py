@@ -1,37 +1,56 @@
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
+from loguru import logger
 
-from bot.core.consts import CONTACTS, LATITUDE, LONGITUDE, SALES, MENU
-from bot.core.db.actions import (
-    add_base_client,
+from bot.core.consts import CONTACTS, LATITUDE, LONGITUDE, SALES, MENU, YANDEX_MAP_URL
+from bot.core.db.client_actions import (
     update_client_by_tg_id,
     get_start_client_by_tg_id,
+    add_client,
 )
+from bot.core.keyboards.admin_keyboards.admin_keyboard import main_admin_kb
 from bot.core.keyboards.cancel_keyboard import cancel, cancel_send_phone, CancelBtnName
 from bot.core.keyboards.user_keyboards.user_keyboard import (
     main_menu_kb,
     MainMenuBtnName,
     LoyaltyProgramBtnName,
-    get_gender,
-    gender_kb,
     choose_weekend_day_kb,
+    WeekendDayBtnName,
+    report_menu_kb,
+    back_btn,
+    ReportBtnName,
 )
-from bot.core.models import PrimeHillModel
+from bot.core.logic.user_logic import client_send_msg_to_admin
+from bot.core.states.admin_state import AdminState
 from bot.core.states.user_state import UserState, Registration
-from bot.service.prime_hill_service.request_card import create_client
+from bot.core.utils import get_admins_id
 
 
 async def start_command(message: types.Message):
     user = get_start_client_by_tg_id(message.from_user.id)
+
     if user is None:
-        add_base_client(telegram_id=message.from_user.id)
-        # await message.answer(
-        #     "Вы можете зарегестрироваться в программе лояльности",
-        #     reply_markup=main_menu_kb()
-        # )
-    # else:
+        data = {"telegram_id": message.from_user.id}
+        try:
+            data["name"] = message.from_user.first_name
+            data["username"] = message.from_user.username
+            data["phone"] = message.contact.phone_number
+        except AttributeError as e:
+            logger.error(e)
+        logger.info(f"{data} was added to database")
+        add_client(data)
     await message.answer("Рады снова вас видеть", reply_markup=main_menu_kb())
     await UserState.start.set()
+
+
+async def become_admin(message: types.Message):
+    admins_id = get_admins_id()
+
+    if str(message.from_user.id) in admins_id:
+        await message.answer("Вы вошли как админ", reply_markup=main_admin_kb())
+        await AdminState.start.set()
+    else:
+        await message.answer("У вас нет доступа")
 
 
 async def sign_up_start_stage(message: types.Message):
@@ -122,28 +141,28 @@ async def cancel_sign_up_phone_stage(message: types.Message, state: FSMContext):
         await state.reset_data()
 
 
-async def sign_up_phone_stage(message: types.Message, state: FSMContext):
-    await state.update_data(phone=message.contact.phone_number)
-    await message.answer(
-        "*Шаг [6/7]*\nВыберите ваш пол", reply_markup=gender_kb(), parse_mode="Markdown"
-    )
-    await Registration.sex_stage.set()
-
-
-async def sign_up_gender_stage(message: types.Message, state: FSMContext):
-    msg = message.text
-    if msg == CancelBtnName.cancel_btn:
-        await message.answer("Вы отменили регистрацию", reply_markup=main_menu_kb())
-        await UserState.start.set()
-        await state.reset_data()
-    else:
-        await message.answer(
-            "*Шаг [7/7]*\nВведите ваш адрес электронной почты",
-            reply_markup=cancel(),
-            parse_mode="Markdown",
-        )
-        await state.update_data(gender=get_gender(msg))
-        await Registration.email_stage.set()
+# async def sign_up_phone_stage(message: types.Message, state: FSMContext):
+#     await state.update_data(phone=message.contact.phone_number)
+#     await message.answer(
+#         "*Шаг [6/7]*\nВыберите ваш пол", reply_markup=gender_kb(), parse_mode="Markdown"
+#     )
+#     await Registration.sex_stage.set()
+#
+#
+# async def sign_up_gender_stage(message: types.Message, state: FSMContext):
+#     msg = message.text
+#     if msg == CancelBtnName.cancel_btn:
+#         await message.answer("Вы отменили регистрацию", reply_markup=main_menu_kb())
+#         await UserState.start.set()
+#         await state.reset_data()
+#     else:
+#         await message.answer(
+#             "*Шаг [7/7]*\nВведите ваш адрес электронной почты",
+#             reply_markup=cancel(),
+#             parse_mode="Markdown",
+#         )
+#         await state.update_data(gender=get_gender(msg))
+#         await Registration.email_stage.set()
 
 
 async def sign_up_email_stage(message: types.Message, state: FSMContext):
@@ -156,20 +175,20 @@ async def sign_up_email_stage(message: types.Message, state: FSMContext):
         await state.update_data(email=msg)
         data = await state.get_data()
         try:
-            prime_hill_client = PrimeHillModel(
-                lastName=data.get("name"),
-                firstName=data.get("surname"),
-                patronymic=data.get("patronymic"),
-                birthday=data.get("bday"),
-                sex=data.get("gender"),
-                email=data.get("email"),
-                phone=data.get("phone"),
-            )
-            prime_hill_card = create_client(prime_hill_client)
-            await state.update_data(prime_hill_card=prime_hill_card)
+            # prime_hill_client = PrimeHillModel(
+            #     lastName=data.get("name"),
+            #     firstName=data.get("surname"),
+            #     patronymic=data.get("patronymic"),
+            #     birthday=data.get("bday"),
+            #     sex=data.get("gender"),
+            #     email=data.get("email"),
+            #     phone=data.get("phone"),
+            # )
+            # prime_hill_card = create_client(prime_hill_client)
+            # await state.update_data(prime_hill_card=prime_hill_card)
             update_client_by_tg_id(message.from_user.id, data)
             await message.answer(
-                f"Вы успешно прошли регистрацию, вот ваша карта: {prime_hill_card}",
+                # f"Вы успешно прошли регистрацию, вот ваша карта: {prime_hill_card}",
             )
         except Exception as e:
             print(f"Error on adding new client {e}")
@@ -186,7 +205,10 @@ async def main_menu_handler(message: types.Message):
     elif msg == MainMenuBtnName.events:
         await message.answer("Выберите день", reply_markup=choose_weekend_day_kb())
     elif msg == MainMenuBtnName.photos:
-        await message.answer("Фотоотчет", reply_markup=main_menu_kb())
+        await message.answer(
+            "Скоро здесь будут фотографии с наших мероприятий!❤️",
+            reply_markup=main_menu_kb(),
+        )
     elif msg == MainMenuBtnName.contacts:
         await message.answer(
             text=CONTACTS, reply_markup=main_menu_kb(), parse_mode="Markdown"
@@ -195,38 +217,55 @@ async def main_menu_handler(message: types.Message):
             latitude=LATITUDE, longitude=LONGITUDE, reply_markup=main_menu_kb()
         )
     elif msg == MainMenuBtnName.feedback:
-        await message.answer("Оставить отзыв", reply_markup=main_menu_kb())
-    # elif msg == MainMenuBtnName.loyalty_program:
-    #     await message.answer("Программа лояльности", reply_markup=loyalty_kb())
-    #     await UserState.sign_up.set()
+        await message.answer(
+            "Вы можете оставить отзыв на Яндекс картах или написать обращение администрации",
+            reply_markup=report_menu_kb(),
+        )
+        await UserState.report.set()
 
 
 async def choose_day(callback: types.CallbackQuery):
     msg = callback.data
-    if msg == "Пятница":
+    if msg == WeekendDayBtnName.friday:
         await callback.message.answer(text="Мероприятие в пятницу")
-    if msg == "Суббота":
+    if msg == WeekendDayBtnName.saturday:
         await callback.message.answer(text="Мероприятие в субботу")
 
 
+async def report_menu(message: types.Message):
+    msg = message.text
+    if msg == back_btn:
+        await message.answer("Вы вернулись в главное меню", reply_markup=main_menu_kb())
+        await UserState.start.set()
+    elif msg == ReportBtnName.yandex:
+        await message.answer(
+            f"Переходите по ссылке и оставляйте отзыв на Яндекс картах🗺️\n\n{YANDEX_MAP_URL}"
+        )
+    elif msg == ReportBtnName.to_admin:
+        await message.answer("Введите ваше сообщение: ", reply_markup=cancel())
+        await UserState.enter_report.set()
+
+
+async def enter_report_menu(message: types.Message):
+    msg = message.text
+    if msg == CancelBtnName.cancel_btn:
+        await message.answer(
+            "Вы отменили ввод сообщения", reply_markup=report_menu_kb()
+        )
+        await UserState.report.set()
+    else:
+        await client_send_msg_to_admin(message.from_user.id, msg)
+        await message.answer(
+            "Ваше обращение отправлено, скоро вернемся с обратной связью!",
+            reply_markup=report_menu_kb(),
+        )
+        await UserState.report.set()
+
+
 def register_users_handlers(dp: Dispatcher):
+    dp.register_message_handler(become_admin, state="*", commands=["admin"])
     dp.register_message_handler(start_command, commands=["start"], state=["*"])
-    # dp.register_message_handler(sign_up_start_stage, state=UserState.sign_up)
-    # dp.register_message_handler(sign_up_name_stage, state=Registration.name_stage)
-    # dp.register_message_handler(sign_up_bday_stage, state=Registration.birthday_stage)
-    # dp.register_message_handler(sign_up_surname_stage, state=Registration.surname_stage)
-    # dp.register_message_handler(sign_up_email_stage, state=Registration.email_stage)
-    # dp.register_message_handler(sign_up_gender_stage, state=Registration.sex_stage)
-    # dp.register_message_handler(
-    #     sign_up_patronymic_stage, state=Registration.patronymic_stage
-    # )
-    # dp.register_message_handler(
-    #     cancel_sign_up_phone_stage, state=Registration.phone_stage
-    # )
-    # dp.register_message_handler(
-    #     sign_up_phone_stage,
-    #     state=Registration.phone_stage,
-    #     content_types=types.ContentType.CONTACT,
-    # )
     dp.register_message_handler(main_menu_handler, state=UserState.start)
     dp.register_callback_query_handler(choose_day, state="*")
+    dp.register_message_handler(report_menu, state=UserState.report)
+    dp.register_message_handler(enter_report_menu, state=UserState.enter_report)

@@ -1,5 +1,4 @@
 from logging.config import fileConfig
-from sqlalchemy import engine
 
 from sqlalchemy.engine import create_engine
 from sqlalchemy.engine.base import Engine
@@ -15,7 +14,6 @@ config = context.config
 fileConfig(config.config_file_name)
 
 from bot.settings import settings
-from base.db_models.base import Base
 from base.db_models.models import *
 
 target_metadata = Base.metadata

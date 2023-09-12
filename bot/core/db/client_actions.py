@@ -38,10 +38,9 @@ def get_client_by_tg_id(telegram_id: str) -> ClientModel | None:
         client_model = ClientModel(
             telegram_id=client.telegram_id,
             id=client.id,
-            name=client.name,
-            username=client.username,
-            phone=client.phone,
-            birthday=client.birthday,
+            name=client.name if client.name is not None else "Имя не указано",
+            username=client.username if client.username is not None else "Юзернейм не указан",
+            phone=client.phone if client.phone is not None else "Номер не указан",
             is_banned=client.is_banned
         )
         # client_model = ClientModel(**client.as_dict())
@@ -73,11 +72,9 @@ def add_client(data):
             client = Client(
                 telegram_id=data.get("telegram_id"),
                 name=data.get("name"),
-                username=data.get("nickname"),
+                username=data.get("username"),
                 phone=data.get("phone"),
-                birthday=data.get("bday"),
                 is_banned=False,
-                prime_hill_card=data.get("prime_hill_card"),
             )
         except KeyError as e:
             logger.error(e)
@@ -91,6 +88,4 @@ def update_client_by_tg_id(telegram_id: str, data):
         client.name = data.get("name")
         client.username = data.get("username")
         client.phone = data.get("phone")
-        client.birthday = data.get("bday")
-        client.prime_hill_card = data.get("prime_hill_card")
         session.commit()

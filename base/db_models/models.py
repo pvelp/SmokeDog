@@ -3,6 +3,7 @@ from __future__ import annotations
 from sqlalchemy import Column, Text, Integer, Boolean
 
 from base.db_models.base import Base
+from bot.core.models import AdminModel
 
 
 class Client(Base):
@@ -13,8 +14,22 @@ class Client(Base):
     name = Column(Text(), nullable=True)
     username = Column(Text(), nullable=True)
     phone = Column(Text(), nullable=True)
-    birthday = Column(Text(), nullable=True)
     is_banned = Column(Boolean(), nullable=True)
 
     def __repr__(self):
         return f"<Client(fio='{self.name} {self.username}', phone={self.phone}, telegram_id='{self.telegram_id}'"
+
+
+class Admin(Base):
+    __tablename__ = "admins"
+
+    id = Column(Integer(), primary_key=True)
+    telegram_id = Column(Text(), unique=True, nullable=False)
+    name = Column(Text(), nullable=True)
+
+    def __repr__(self):
+        return f"<Admin(telegram_id='{self.telegram_id}', name='{self.name}')"
+
+    def to_obj(self):
+        return AdminModel(telegram_id=str(self.telegram_id), name=self.name)
+
