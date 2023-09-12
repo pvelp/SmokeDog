@@ -264,7 +264,7 @@ async def enter_report_menu(message: types.Message):
 
 def register_users_handlers(dp: Dispatcher):
     dp.register_message_handler(become_admin, state="*", commands=["admin"])
-    dp.register_message_handler(start_command, commands=["start"], state=["*"])
+    dp.register_message_handler(start_command, commands=["start"], state="*")
     dp.register_message_handler(main_menu_handler, state=UserState.start)
     dp.register_callback_query_handler(choose_day, state="*")
     dp.register_message_handler(report_menu, state=UserState.report)

@@ -17,7 +17,7 @@ from bot.core.handlers.admin import register_admin_handlers
 if __name__ == "__main__":
     set_settings_file_for_db(settings)
     logger.info('database connected successfully')
-    register_users_handlers(dp)
     register_admin_handlers(dp)
+    register_users_handlers(dp)
     dp.middleware.setup(LoggingMiddleware())
     executor.start_polling(dp, loop=loop)

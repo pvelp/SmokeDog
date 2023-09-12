@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy import Column, Text, Integer, Boolean
 
 from base.db_models.base import Base
-from bot.core.models import AdminModel
+from bot.core.models import AdminModel, ClientModel
 
 
 class Client(Base):
@@ -19,6 +19,15 @@ class Client(Base):
     def __repr__(self):
         return f"<Client(fio='{self.name} {self.username}', phone={self.phone}, telegram_id='{self.telegram_id}'"
 
+    def to_obj(self):
+        return ClientModel(
+            telegram_id=str(self.telegram_id),
+            name=self.name if self.name is not None else "Имя не указано",
+            username=self.username if self.username is not None else "Юзернейм не указан",
+            phone=self.phone if self.phone is not None else "Телефон не указан",
+            is_banned=self.is_banned,
+        )
+
 
 class Admin(Base):
     __tablename__ = "admins"
@@ -32,4 +41,3 @@ class Admin(Base):
 
     def to_obj(self):
         return AdminModel(telegram_id=str(self.telegram_id), name=self.name)
-

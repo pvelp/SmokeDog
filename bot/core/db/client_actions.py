@@ -5,6 +5,7 @@ from loguru import logger
 from base.db_connection import get_session
 from base.db_models.models import Client
 from bot.core.models import ClientModel, StartClientModel
+from sqlalchemy import select
 
 
 def add_base_client(telegram_id: str):
@@ -89,3 +90,10 @@ def update_client_by_tg_id(telegram_id: str, data):
         client.username = data.get("username")
         client.phone = data.get("phone")
         session.commit()
+
+
+def get_all_clients() -> list[ClientModel]:
+    with get_session() as session:
+        clients = session.query(Client).all()
+    result = [client.to_obj() for client in clients]
+    return result
