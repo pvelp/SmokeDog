@@ -1,3 +1,4 @@
+from bot.core.keyboards.cancel_keyboard import back_btn
 from bot.core.keyboards.utils import create_buttons
 
 
@@ -24,7 +25,8 @@ main_admin_menu_btns = [
 database_menu_btns = [
     DataBaseMenuBtnName.get_db,
     DataBaseMenuBtnName.ban_client,
-    DataBaseMenuBtnName.delete_client
+    DataBaseMenuBtnName.delete_client,
+    back_btn
 ]
 
 

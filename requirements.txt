@@ -9,3 +9,5 @@ loguru~=0.7.0
 pymongo
 motor
 requests~=2.31.0
+pandas
+openpyxl

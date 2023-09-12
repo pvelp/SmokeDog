@@ -5,3 +5,4 @@ class AdminState(StatesGroup):
     start = State()
     enter_message = State()
     enter_photo = State()
+    database = State()

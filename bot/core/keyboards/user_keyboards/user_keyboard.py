@@ -1,5 +1,5 @@
 from bot.core.consts import TIPS_URL, BOOKING_URL
-from bot.core.keyboards.cancel_keyboard import CancelBtnName
+from bot.core.keyboards.cancel_keyboard import CancelBtnName, back_btn
 from bot.core.keyboards.utils import create_buttons, create_inline_buttons
 
 
@@ -28,8 +28,6 @@ class ReportBtnName:
     to_admin = "👮🏻‍Обращение для администрации"
     yandex = "📍Яндекс"
 
-
-back_btn = "⬅️Назад"
 
 main_menu_btns = [
     MainMenuBtnName.menu,

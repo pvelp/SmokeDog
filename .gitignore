@@ -5,4 +5,4 @@ venv
 alembic/versions/*
 .DS_Store
 *.db
-pictures
+sources
