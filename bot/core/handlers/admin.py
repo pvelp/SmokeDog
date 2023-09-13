@@ -15,6 +15,8 @@ from bot.core.keyboards.admin_keyboards.admin_keyboard import (
     main_admin_kb,
     DataBaseMenuBtnName,
     database_kb,
+    personal_kb,
+    AdminDatabaseMenuBtnName,
 )
 from bot.core.keyboards.cancel_keyboard import (
     CancelBtnName,
@@ -43,7 +45,8 @@ async def main_admin_menu(message: types.Message):
         )
         await AdminState.database.set()
     elif msg == MainAdminMenuBtnName.personal:
-        await message.answer("Personal", reply_markup=main_admin_kb())
+        await message.answer("Меню управления персоналом", reply_markup=personal_kb())
+        await AdminState.personal.set()
 
 
 async def enter_message(message: types.Message, state: FSMContext):
@@ -142,7 +145,9 @@ async def database_menu(message: types.Message):
         )
         await AdminState.ban.set()
     elif msg == DataBaseMenuBtnName.delete_client:
-        await message.answer("Введите id клиента, которого необходимо удалить", cancel())
+        await message.answer(
+            "Введите id клиента, которого необходимо удалить", cancel()
+        )
         await AdminState.delete_user.set()
 
 
@@ -184,7 +189,22 @@ async def enter_id_for_delete_user(message: types.Message):
     await AdminState.start.set()
 
 
-async def answer_on_report(callback: types.CallbackQuery):
+async def personal_menu(message: types.Message):
+    msg = message.text
+    if msg == back_btn:
+        await message.answer("Вы вернулись в главное меню")
+        await AdminState.start.set()
+    elif msg == AdminDatabaseMenuBtnName.get_admins:
+        pass
+    elif msg == AdminDatabaseMenuBtnName.add_admin:
+        pass
+    elif msg == AdminDatabaseMenuBtnName.delete_admin:
+        pass
+
+
+async def answer_on_report(callback: types.CallbackQuery, state: FSMContext):
+    data = callback.data.split("_")
+    client_id = data[1]
     pass
 
 
@@ -197,3 +217,5 @@ def register_admin_handlers(dp: Dispatcher):
     dp.register_message_handler(enter_message, state=AdminState.enter_message)
     dp.register_message_handler(database_menu, state=AdminState.database)
     dp.register_message_handler(enter_id_for_banning, state=AdminState.ban)
+    dp.register_message_handler(enter_id_for_delete_user, state=AdminState.delete_user)
+    dp.register_message_handler(personal_menu, state=AdminState.personal)

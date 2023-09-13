@@ -8,3 +8,4 @@ class AdminState(StatesGroup):
     database = State()
     ban = State()
     delete_user = State()
+    personal = State()

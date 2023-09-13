@@ -15,6 +15,12 @@ class DataBaseMenuBtnName:
     delete_client = "Удалить клиента"
 
 
+class AdminDatabaseMenuBtnName:
+    add_admin = "Добавить админа"
+    delete_admin = "Удалить админа"
+    get_admins = "Получить базу админов"
+
+
 main_admin_menu_btns = [
     MainAdminMenuBtnName.mailing,
     MainAdminMenuBtnName.events,
@@ -30,9 +36,21 @@ database_menu_btns = [
 ]
 
 
+personal_menu_btns = [
+    AdminDatabaseMenuBtnName.add_admin,
+    AdminDatabaseMenuBtnName.delete_admin,
+    AdminDatabaseMenuBtnName.get_admins,
+    back_btn
+]
+
+
 def main_admin_kb():
     return create_buttons(main_admin_menu_btns)
 
 
 def database_kb():
     return create_buttons(database_menu_btns)
+
+
+def personal_kb():
+    return create_buttons(personal_menu_btns)
