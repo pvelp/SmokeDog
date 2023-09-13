@@ -6,3 +6,5 @@ class AdminState(StatesGroup):
     enter_message = State()
     enter_photo = State()
     database = State()
+    ban = State()
+    delete_user = State()

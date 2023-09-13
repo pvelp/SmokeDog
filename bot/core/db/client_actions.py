@@ -5,7 +5,7 @@ from loguru import logger
 from base.db_connection import get_session
 from base.db_models.models import Client
 from bot.core.models import ClientModel, StartClientModel
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 
 def add_base_client(telegram_id: str):
@@ -97,3 +97,13 @@ def get_all_clients() -> list[ClientModel]:
         clients = session.query(Client).all()
     result = [client.to_obj() for client in clients]
     return result
+
+
+def set_is_banned(telegram_id: str):
+    with get_session() as session:
+        try:
+            client = session.query(Client).filter(Client.telegram_id == telegram_id).first()
+            client.is_banned = True
+            session.commit()
+        except Exception as e:
+            logger.error(e)

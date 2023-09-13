@@ -5,6 +5,11 @@ from aiogram.dispatcher import FSMContext
 from loguru import logger
 
 from bot.config import bot
+from bot.core.db.client_actions import (
+    set_is_banned,
+    get_client_by_tg_id,
+    delete_user_by_tg_id,
+)
 from bot.core.keyboards.admin_keyboards.admin_keyboard import (
     MainAdminMenuBtnName,
     main_admin_kb,
@@ -33,7 +38,9 @@ async def main_admin_menu(message: types.Message):
         )
         await AdminState.enter_message.set()
     elif msg == MainAdminMenuBtnName.database:
-        await message.answer("Меню управлением базой клиентов", reply_markup=database_kb())
+        await message.answer(
+            "Меню управлением базой клиентов", reply_markup=database_kb()
+        )
         await AdminState.database.set()
     elif msg == MainAdminMenuBtnName.personal:
         await message.answer("Personal", reply_markup=main_admin_kb())
@@ -120,15 +127,61 @@ async def cancel_enter_photo(message: types.Message, state: FSMContext):
 async def database_menu(message: types.Message):
     msg = message.text
     if msg == back_btn:
-        await message.answer("Вы вернулись в главное меню", reply_markup=main_admin_kb())
+        await message.answer(
+            "Вы вернулись в главное меню", reply_markup=main_admin_kb()
+        )
     elif msg == DataBaseMenuBtnName.get_db:
         get_excel_from_db("users")
-        await bot.send_document(chat_id=message.from_user.id, document=types.InputFile("users.xlsx"))
+        await bot.send_document(
+            chat_id=message.from_user.id, document=types.InputFile("users.xlsx")
+        )
         os.remove("users.xlsx")
     elif msg == DataBaseMenuBtnName.ban_client:
-        pass
+        await message.answer(
+            "Введите id клиента, которого необходимо заблокировать", cancel()
+        )
+        await AdminState.ban.set()
     elif msg == DataBaseMenuBtnName.delete_client:
-        pass
+        await message.answer("Введите id клиента, которого необходимо удалить", cancel())
+        await AdminState.delete_user.set()
+
+
+async def enter_id_for_banning(message: types.Message):
+    msg = message.text
+    if msg == CancelBtnName.cancel_btn:
+        await message.answer(
+            "Вы отменили ввод id пользователя для блокировки",
+            reply_markup=main_admin_kb(),
+        )
+    else:
+        set_is_banned(msg)
+        client = get_client_by_tg_id(telegram_id=msg)
+        new_msg = (
+            f"Вы заблокировали пользователя с данными\n\nId: {client.telegram_id}\nИмя: "
+            f"{client.name}\nЮзернейм: {client.username}\nТелефон:"
+            f" {client.phone}\nСтатус блокировки: {client.is_banned}"
+        )
+        await message.answer(new_msg, reply_markup=main_admin_kb())
+    await AdminState.start.set()
+
+
+async def enter_id_for_delete_user(message: types.Message):
+    msg = message.text
+    if msg == CancelBtnName.cancel_btn:
+        await message.answer(
+            "Вы отменили ввод id пользователя для удаления",
+            reply_markup=main_admin_kb(),
+        )
+    else:
+        client = get_client_by_tg_id(telegram_id=msg)
+        new_msg = (
+            f"Вы удалили пользователя с данными\n\nId: {client.telegram_id}\nИмя: "
+            f"{client.name}\nЮзернейм: {client.username}\nТелефон:"
+            f" {client.phone}\nСтатус блокировки: {client.is_banned}"
+        )
+        delete_user_by_tg_id(msg)
+        await message.answer(new_msg, reply_markup=main_admin_kb())
+    await AdminState.start.set()
 
 
 async def answer_on_report(callback: types.CallbackQuery):
@@ -143,3 +196,4 @@ def register_admin_handlers(dp: Dispatcher):
     )
     dp.register_message_handler(enter_message, state=AdminState.enter_message)
     dp.register_message_handler(database_menu, state=AdminState.database)
+    dp.register_message_handler(enter_id_for_banning, state=AdminState.ban)
