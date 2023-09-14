@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 
 def get_admins_id() -> list[str]:
     admins = get_all_admins()
-    result = [settings.admin_id]
+    result = [settings.admin_id, settings.super_admin]
     for admin in admins:
         result.append(admin.telegram_id)
     return result
