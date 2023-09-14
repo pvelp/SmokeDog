@@ -19,11 +19,12 @@ def add_event(day: str, text: str = None, media_path: str = None):
 
 def get_event_by_day(day: str) -> dict | None:
     with get_session() as session:
-        event = session.query(Event).filter(Event.day == day).first()
-        if event is None:
-            logger.error(f"Event in {day} not found")
+        try:
+            event = session.query(Event).filter(Event.day == day).first()
+            return event.to_dict()
+        except TypeError as e:
+            logger.error(f"{e}. Event in {day} not found")
             return None
-    return event.to_dict()
 
 
 def delete_event_by_day(day: str):
