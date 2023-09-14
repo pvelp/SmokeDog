@@ -10,13 +10,14 @@ from bot.core.db.client_actions import (
     get_client_by_tg_id,
     delete_user_by_tg_id,
 )
+from bot.core.db.event_actions import delete_event_by_day, add_event
 from bot.core.keyboards.admin_keyboards.admin_keyboard import (
     MainAdminMenuBtnName,
     main_admin_kb,
     DataBaseMenuBtnName,
     database_kb,
-    personal_kb,
     AdminDatabaseMenuBtnName,
+    weekend_kb,
 )
 from bot.core.keyboards.cancel_keyboard import (
     CancelBtnName,
@@ -31,7 +32,8 @@ from bot.core.utils import get_clients_id, get_excel_from_db
 async def main_admin_menu(message: types.Message):
     msg = message.text
     if msg == MainAdminMenuBtnName.events:
-        await message.answer("Events", reply_markup=main_admin_kb())
+        await message.answer("*Шаг [1/3]*\nВыберите день", reply_markup=weekend_kb())
+        await AdminState.choose_event_day.set()
     elif msg == MainAdminMenuBtnName.mailing:
         await message.answer(
             "*Шаг [1/2]*\nВведите ваше сообщение",
@@ -45,15 +47,16 @@ async def main_admin_menu(message: types.Message):
         )
         await AdminState.database.set()
     elif msg == MainAdminMenuBtnName.personal:
-        await message.answer("Меню управления персоналом", reply_markup=personal_kb())
-        await AdminState.personal.set()
+        await message.answer(
+            "Меню управления персоналом скоро заработает!", reply_markup=main_admin_kb()
+        )
 
 
 async def enter_message(message: types.Message, state: FSMContext):
     msg = message.text
     if msg == CancelBtnName.cancel_btn:
         await message.answer("Вы отменили ввод сообщения", reply_markup=main_admin_kb())
-        await state.reset_state()
+        await state.reset_data()
         await AdminState.start.set()
     elif msg == CancelBtnName.miss:
         await message.answer(
@@ -103,7 +106,7 @@ async def cancel_enter_photo(message: types.Message, state: FSMContext):
         await message.answer(
             "Вы отменили создание сообщения", reply_markup=main_admin_kb()
         )
-        await state.reset_state()
+        await state.reset_data()
         await AdminState.start.set()
     elif msg == CancelBtnName.miss:
         clients_id = get_clients_id()
@@ -124,7 +127,7 @@ async def cancel_enter_photo(message: types.Message, state: FSMContext):
 
         await message.answer("Ваше сообщение отправлено", reply_markup=main_admin_kb())
         await AdminState.start.set()
-        await state.reset_state()
+        await state.reset_data()
 
 
 async def database_menu(message: types.Message):
@@ -204,8 +207,152 @@ async def personal_menu(message: types.Message):
 
 async def answer_on_report(callback: types.CallbackQuery, state: FSMContext):
     data = callback.data.split("_")
-    client_id = data[1]
-    pass
+    # if data[0] == "delete":
+    # await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
+    if data[0] == "complete":
+        await bot.edit_message_text(
+            chat_id=callback.message.chat.id,
+            message_id=callback.message.message_id,
+            text=callback.message.text + "\n\n*РЕШЕНО*",
+            reply_markup=None,
+            parse_mode="Markdown",
+        )
+        await state.reset_data()
+        await callback.answer("Обращение обработано!")
+    else:
+        client_id = data[1]
+        await callback.message.answer(
+            "Напишите ответ пользователю", reply_markup=cancel()
+        )
+        await callback.answer("")
+        await AdminState.enter_support_message.set()
+        await state.update_data(client_id=client_id)
+
+
+async def enter_msg_for_answer_support(message: types.Message, state: FSMContext):
+    msg = message.text
+    if msg == CancelBtnName.cancel_btn:
+        await message.answer(
+            "Вы отменили ответ на обращение клиента", reply_markup=main_admin_kb()
+        )
+        await AdminState.start.set()
+        await state.reset_data()
+    else:
+        data = await state.get_data()
+        client_id = data["client_id"]
+        try:
+            await bot.send_message(chat_id=client_id, text=msg)
+            await message.answer(
+                "Ваше сообщение было отправлено", reply_markup=main_admin_kb()
+            )
+        except Exception as e:
+            logger.error(e)
+            await message.answer(
+                "Ваше сообщение не было отправлено из-за серверной ошибки, обратитесь "
+                "к команде разработчиков или попробуйте ответить вручную",
+                main_admin_kb(),
+            )
+        await AdminState.start.set()
+
+
+async def choose_event_day(message: types.Message, state: FSMContext):
+    msg = message.text
+    if msg == CancelBtnName.cancel_btn:
+        await message.answer("Вы отменили создание афиши", reply_markup=main_admin_kb())
+        await AdminState.start.set()
+    else:
+        await state.update_data(day=msg)
+        await message.answer(
+            "*Шаг [2/3]*\nВведите текст к афише",
+            parse_mode="Markdown",
+            reply_markup=cancel_or_miss(),
+        )
+        await AdminState.enter_event_message.set()
+
+
+async def enter_event_message(message: types.Message, state: FSMContext):
+    msg = message.text
+    if msg == CancelBtnName.cancel_btn:
+        await message.answer("Вы отменили создание афишы", reply_markup=main_admin_kb())
+        await AdminState.start.set()
+    elif msg == CancelBtnName.miss:
+        await message.answer(
+            "*Шаг [3/3]*\nПришлите медиафайл к афише",
+            parse_mode="Markdown",
+            reply_markup=cancel(),
+        )
+        await AdminState.enter_event_picture.set()
+    else:
+        await state.update_data(text=msg)
+        await message.answer(
+            "*Шаг [3/3]*\nПришлите медиафайл к афише",
+            parse_mode="Markdown",
+            reply_markup=cancel_or_miss(),
+        )
+        await AdminState.enter_event_picture.set()
+
+
+async def enter_event_picture(message: types.Message, state: FSMContext):
+    msg = message.text
+    if msg == CancelBtnName.cancel_btn:
+        await message.answer("Вы отменили создание афишы", reply_markup=main_admin_kb())
+    elif msg == CancelBtnName.miss:
+        data = await state.get_data()
+        day = data["day"]
+        text = day["text"]
+        delete_event_by_day(day)
+        add_event(day=day, text=text)
+        await message.answer(f"Афиша на день {day} создана", reply_markup=main_admin_kb())
+        await state.reset_data()
+    else:
+        data = await state.get_data()
+        day = data["day"]
+        text = data["text"]
+        dest = f"sources/events/{day}.jpeg"
+        video_dest = f"sources/events/{day}.mp4"
+        try:
+            os.remove(dest)
+            os.remove(video_dest)
+        except Exception as e:
+            logger.info(e)
+        delete_event_by_day(day)
+        await message.photo[-1].download(dest)
+        add_event(day=day, text=text, media_path=dest)
+        await message.answer(f"Афиша на день {day} создана", reply_markup=main_admin_kb())
+        await state.reset_data()
+    await AdminState.start.set()
+
+
+async def enter_event_video(message: types.Message, state: FSMContext):
+    msg = message.text
+    if msg == CancelBtnName.cancel_btn:
+        await message.answer("Вы отменили создание афишы", reply_markup=main_admin_kb())
+    elif msg == CancelBtnName.miss:
+        data = await state.get_data()
+        day = data["day"]
+        text = day["text"]
+        delete_event_by_day(day)
+        add_event(day=day, text=text)
+        await message.answer(f"Афиша на день {day} создана", reply_markup=main_admin_kb())
+        await state.reset_data()
+    else:
+        data = await state.get_data()
+        day = data["day"]
+        text = data["text"]
+        pic_dest = f"sources/events/{day}.jpeg"
+        dest = f"sources/events/{day}.mp4"
+        try:
+            os.remove(pic_dest)
+        except Exception as e:
+            logger.info(e)
+        delete_event_by_day(day)
+        file_id = message.video.file_id
+        file = await bot.get_file(file_id)
+        await bot.download_file(file.file_path, dest)
+        add_event(day=day, text=text, media_path=dest)
+        await message.answer(f"Афиша на день {day} создана", reply_markup=main_admin_kb())
+        await state.reset_data()
+    await AdminState.start.set()
 
 
 def register_admin_handlers(dp: Dispatcher):
@@ -218,4 +365,12 @@ def register_admin_handlers(dp: Dispatcher):
     dp.register_message_handler(database_menu, state=AdminState.database)
     dp.register_message_handler(enter_id_for_banning, state=AdminState.ban)
     dp.register_message_handler(enter_id_for_delete_user, state=AdminState.delete_user)
-    dp.register_message_handler(personal_menu, state=AdminState.personal)
+    # dp.register_message_handler(personal_menu, state=AdminState.personal)
+    dp.register_callback_query_handler(answer_on_report, state=[*AdminState.states])
+    dp.register_message_handler(
+        enter_msg_for_answer_support, state=AdminState.enter_support_message
+    )
+    dp.register_message_handler(choose_event_day, state=AdminState.choose_event_day)
+    dp.register_message_handler(enter_event_message, state=AdminState.enter_event_message)
+    dp.register_message_handler(enter_event_picture, state=AdminState.enter_event_picture, content_types=["photo"])
+    dp.register_message_handler(enter_event_video, state=AdminState.enter_event_picture, content_types=["video"])

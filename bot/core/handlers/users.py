@@ -2,13 +2,26 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from loguru import logger
 
-from bot.core.consts import CONTACTS, LATITUDE, LONGITUDE, SALES, MENU, YANDEX_MAP_URL
+from bot.config import bot
+from bot.core.consts import (
+    CONTACTS,
+    LATITUDE,
+    LONGITUDE,
+    SALES,
+    MENU,
+    YANDEX_MAP_URL,
+    PHOTO_URL,
+)
 from bot.core.db.client_actions import (
     update_client_by_tg_id,
     get_start_client_by_tg_id,
     add_client,
 )
-from bot.core.keyboards.admin_keyboards.admin_keyboard import main_admin_kb
+from bot.core.db.event_actions import get_event_by_day
+from bot.core.keyboards.admin_keyboards.admin_keyboard import (
+    main_admin_kb,
+    WeekendBtnName,
+)
 from bot.core.keyboards.cancel_keyboard import cancel, cancel_send_phone, CancelBtnName
 from bot.core.keyboards.user_keyboards.user_keyboard import (
     main_menu_kb,
@@ -206,7 +219,7 @@ async def main_menu_handler(message: types.Message):
         await message.answer("Выберите день", reply_markup=choose_weekend_day_kb())
     elif msg == MainMenuBtnName.photos:
         await message.answer(
-            "Скоро здесь будут фотографии с наших мероприятий!❤️",
+            f"Фотографии с наших мероприятий!❤️\n\n{PHOTO_URL}",
             reply_markup=main_menu_kb(),
         )
     elif msg == MainMenuBtnName.contacts:
@@ -225,11 +238,26 @@ async def main_menu_handler(message: types.Message):
 
 
 async def choose_day(callback: types.CallbackQuery):
-    msg = callback.data
-    if msg == WeekendDayBtnName.friday:
-        await callback.message.answer(text="Мероприятие в пятницу")
-    if msg == WeekendDayBtnName.saturday:
-        await callback.message.answer(text="Мероприятие в субботу")
+    day = WeekendBtnName.friday if WeekendBtnName.friday in callback.data else WeekendBtnName.saturday
+    event = get_event_by_day(day)
+    if event["text"] is None:
+        text = "Афиша скоро будет опубликована🤩"
+    else:
+        text = event["text"]
+
+    if event["media"] is None:
+        await bot.send_message(chat_id=callback.message.chat.id, text=text)
+    if "jpeg" in event["media"]:
+        await bot.send_photo(
+            chat_id=callback.message.chat.id,
+            photo=types.InputFile(event["media"]),
+            caption=text,
+        )
+    if "mp4" in event["media"]:
+        await bot.send_video(chat_id=callback.message.chat.id,
+                             video=types.InputFile(event["media"]),
+                             caption=text)
+    await callback.answer("")
 
 
 async def report_menu(message: types.Message):
@@ -254,7 +282,7 @@ async def enter_report_menu(message: types.Message):
         )
         await UserState.report.set()
     else:
-        await client_send_msg_to_admin(message.from_user.id, msg)
+        await client_send_msg_to_admin(message.from_user.id, msg, message.message_id)
         await message.answer(
             "Ваше обращение отправлено, скоро вернемся с обратной связью!",
             reply_markup=report_menu_kb(),
@@ -269,3 +297,4 @@ def register_users_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(choose_day, state="*")
     dp.register_message_handler(report_menu, state=UserState.report)
     dp.register_message_handler(enter_report_menu, state=UserState.enter_report)
+

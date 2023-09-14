@@ -1,4 +1,4 @@
-from bot.core.keyboards.cancel_keyboard import back_btn
+from bot.core.keyboards.cancel_keyboard import back_btn, CancelBtnName
 from bot.core.keyboards.utils import create_buttons
 
 
@@ -19,6 +19,11 @@ class AdminDatabaseMenuBtnName:
     add_admin = "Добавить админа"
     delete_admin = "Удалить админа"
     get_admins = "Получить базу админов"
+
+
+class WeekendBtnName:
+    friday = "Пятница"
+    saturday = "Суббота"
 
 
 main_admin_menu_btns = [
@@ -44,6 +49,13 @@ personal_menu_btns = [
 ]
 
 
+weekend_btns = [
+    WeekendBtnName.friday,
+    WeekendBtnName.saturday,
+    CancelBtnName.cancel_btn
+]
+
+
 def main_admin_kb():
     return create_buttons(main_admin_menu_btns)
 
@@ -54,3 +66,7 @@ def database_kb():
 
 def personal_kb():
     return create_buttons(personal_menu_btns)
+
+
+def weekend_kb():
+    return create_buttons(weekend_btns)

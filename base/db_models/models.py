@@ -41,3 +41,15 @@ class Admin(Base):
 
     def to_obj(self):
         return AdminModel(telegram_id=str(self.telegram_id), name=self.name)
+
+
+class Event(Base):
+    __tablename__ = "events"
+
+    id = Column(Integer(), primary_key=True)
+    text = Column(Text(), nullable=True)
+    media_path = Column(Text, nullable=True)
+    day = Column(Text, nullable=False)
+
+    def to_dict(self):
+        return {"text": self.text, "media": self.media_path}

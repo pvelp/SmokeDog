@@ -20,3 +20,4 @@ class StartClientModel(BaseModel):
 class AdminModel(BaseModel):
     telegram_id: str
     name: str
+
