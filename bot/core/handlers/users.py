@@ -240,23 +240,26 @@ async def main_menu_handler(message: types.Message):
 async def choose_day(callback: types.CallbackQuery):
     day = WeekendBtnName.friday if WeekendBtnName.friday in callback.data else WeekendBtnName.saturday
     event = get_event_by_day(day)
-    if event["text"] is None:
-        text = "Афиша скоро будет опубликована🤩"
-    else:
-        text = event["text"]
+    if event is not None:
+        if event["text"] is None:
+            text = "Афиша скоро будет опубликована🤩"
+        else:
+            text = event["text"]
 
-    if event["media"] is None:
-        await bot.send_message(chat_id=callback.message.chat.id, text=text)
-    if "jpeg" in event["media"]:
-        await bot.send_photo(
-            chat_id=callback.message.chat.id,
-            photo=types.InputFile(event["media"]),
-            caption=text,
-        )
-    if "mp4" in event["media"]:
-        await bot.send_video(chat_id=callback.message.chat.id,
-                             video=types.InputFile(event["media"]),
-                             caption=text)
+        if event["media"] is None:
+            await bot.send_message(chat_id=callback.message.chat.id, text=text)
+        if "jpeg" in event["media"]:
+            await bot.send_photo(
+                chat_id=callback.message.chat.id,
+                photo=types.InputFile(event["media"]),
+                caption=text,
+            )
+        if "mp4" in event["media"]:
+            await bot.send_video(chat_id=callback.message.chat.id,
+                                video=types.InputFile(event["media"]),
+                                caption=text)
+    else:
+        await callback.message.answer("Афиша на этот день пока еще не выложена🥹")
     await callback.answer("")
 
 
@@ -292,7 +295,7 @@ async def enter_report_menu(message: types.Message):
 
 def register_users_handlers(dp: Dispatcher):
     dp.register_message_handler(become_admin, state="*", commands=["admin"])
-    dp.register_message_handler(start_command, commands=["start"], state="*")
+    dp.register_message_handler(start_command, commands=["start"], state=[None, *UserState.all_states, *AdminState.all_states])
     dp.register_message_handler(main_menu_handler, state=UserState.start)
     dp.register_callback_query_handler(choose_day, state="*")
     dp.register_message_handler(report_menu, state=UserState.report)

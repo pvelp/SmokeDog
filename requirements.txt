@@ -4,7 +4,6 @@ alembic~=1.11.1
 python-dotenv
 pydantic~=2.1.1
 pydantic_settings
-psycopg2
 loguru~=0.7.0
 pymongo
 motor

@@ -110,7 +110,7 @@ async def cancel_enter_photo(message: types.Message, state: FSMContext):
         await AdminState.start.set()
     elif msg == CancelBtnName.miss:
         clients_id = get_clients_id()
-        data = state.get_data()
+        data = await state.get_data()
         msg = ""
 
         try:
@@ -136,6 +136,7 @@ async def database_menu(message: types.Message):
         await message.answer(
             "Вы вернулись в главное меню", reply_markup=main_admin_kb()
         )
+        await AdminState.start.set()
     elif msg == DataBaseMenuBtnName.get_db:
         get_excel_from_db("users")
         await bot.send_document(
@@ -366,7 +367,7 @@ def register_admin_handlers(dp: Dispatcher):
     dp.register_message_handler(enter_id_for_banning, state=AdminState.ban)
     dp.register_message_handler(enter_id_for_delete_user, state=AdminState.delete_user)
     # dp.register_message_handler(personal_menu, state=AdminState.personal)
-    dp.register_callback_query_handler(answer_on_report, state=[*AdminState.states])
+    dp.register_callback_query_handler(answer_on_report, state=[*AdminState.all_states])
     dp.register_message_handler(
         enter_msg_for_answer_support, state=AdminState.enter_support_message
     )
