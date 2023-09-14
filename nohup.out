@@ -1,0 +1,63 @@
+2023-09-15 00:59:03.512 | INFO     | __main__:<module>:19 - database connected successfully
+2023-09-15 00:59:03.738 | ERROR    | bot.core.db.event_actions:get_event_by_day:26 - 'NoneType' object has no attribute 'to_dict'. Event in Суббота not found
+Task exception was never retrieved
+future: <Task finished name='Task-7' coro=<Dispatcher._process_polling_updates() done, defined at /root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/dispatcher/dispatcher.py:407> exception=InvalidQueryID('Query is too old and response timeout expired or query id is invalid')>
+Traceback (most recent call last):
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/dispatcher/dispatcher.py", line 415, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates, fast)):
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/dispatcher/dispatcher.py", line 235, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/dispatcher/handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/dispatcher/dispatcher.py", line 283, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/dispatcher/handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+  File "/root/SmokeDog/./bot/core/handlers/users.py", line 263, in choose_day
+    await callback.answer("")
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/types/callback_query.py", line 57, in answer
+    return await self.bot.answer_callback_query(callback_query_id=self.id,
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/bot/bot.py", line 2890, in answer_callback_query
+    return await self.request(api.Methods.ANSWER_CALLBACK_QUERY, payload)
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/bot/api.py", line 115, in check_result
+    exceptions.BadRequest.detect(description)
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.InvalidQueryID: Query is too old and response timeout expired or query id is invalid
+2023-09-15 00:59:19.679 | ERROR    | bot.core.db.event_actions:get_event_by_day:26 - 'NoneType' object has no attribute 'to_dict'. Event in Суббота not found
+2023-09-15 00:59:21.158 | ERROR    | bot.core.db.event_actions:get_event_by_day:26 - 'NoneType' object has no attribute 'to_dict'. Event in Пятница not found
+2023-09-15 00:59:59.057 | INFO     | __main__:<module>:19 - database connected successfully
+Cause exception while getting updates.
+Traceback (most recent call last):
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/dispatcher/dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/bot/bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/bot/api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running
+Cause exception while getting updates.
+Traceback (most recent call last):
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/dispatcher/dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/bot/bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/bot/api.py", line 119, in check_result
+    exceptions.ConflictError.detect(description)
+  File "/root/SmokeDog/venv/lib/python3.9/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.TerminatedByOtherGetUpdates: Terminated by other getupdates request; make sure that only one bot instance is running

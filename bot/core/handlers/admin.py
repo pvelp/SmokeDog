@@ -32,7 +32,7 @@ from bot.core.utils import get_clients_id, get_excel_from_db
 async def main_admin_menu(message: types.Message):
     msg = message.text
     if msg == MainAdminMenuBtnName.events:
-        await message.answer("*Шаг [1/3]*\nВыберите день", reply_markup=weekend_kb())
+        await message.answer("*Шаг [1/3]*\nВыберите день", reply_markup=weekend_kb(), parse_mode="Markdown")
         await AdminState.choose_event_day.set()
     elif msg == MainAdminMenuBtnName.mailing:
         await message.answer(
