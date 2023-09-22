@@ -26,6 +26,7 @@ class WeekendBtnName:
     saturday = "Суббота"
 
 
+
 main_admin_menu_btns = [
     MainAdminMenuBtnName.mailing,
     MainAdminMenuBtnName.events,

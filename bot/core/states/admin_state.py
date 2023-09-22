@@ -13,3 +13,5 @@ class AdminState(StatesGroup):
     enter_event_message = State()
     enter_event_picture = State()
     choose_event_day = State()
+    enter_admin_id = State()
+    enter_admin_id_for_del = State()

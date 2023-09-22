@@ -5,6 +5,7 @@ from aiogram.dispatcher import FSMContext
 from loguru import logger
 
 from bot.config import bot
+from bot.core.db.admin_actions import add_admin, delete_admin, get_admin_by_id
 from bot.core.db.client_actions import (
     set_is_banned,
     get_client_by_tg_id,
@@ -18,6 +19,7 @@ from bot.core.keyboards.admin_keyboards.admin_keyboard import (
     database_kb,
     AdminDatabaseMenuBtnName,
     weekend_kb,
+    personal_kb,
 )
 from bot.core.keyboards.cancel_keyboard import (
     CancelBtnName,
@@ -25,8 +27,10 @@ from bot.core.keyboards.cancel_keyboard import (
     cancel,
     back_btn,
 )
+from bot.core.keyboards.user_keyboards.user_keyboard import main_menu_kb
 from bot.core.states.admin_state import AdminState
-from bot.core.utils import get_clients_id, get_excel_from_db
+from bot.core.states.user_state import UserState
+from bot.core.utils import get_clients_id, get_excel_from_db, get_admins_id
 
 
 async def main_admin_menu(message: types.Message):
@@ -47,9 +51,11 @@ async def main_admin_menu(message: types.Message):
         )
         await AdminState.database.set()
     elif msg == MainAdminMenuBtnName.personal:
-        await message.answer(
-            "Меню управления персоналом скоро заработает!", reply_markup=main_admin_kb()
-        )
+        await message.answer("Вы вошли в меню управления персоналом", reply_markup=personal_kb())
+        # await message.answer(
+        #     "Меню управления персоналом скоро заработает!", reply_markup=main_admin_kb()
+        # )
+        await AdminState.personal.set()
 
 
 async def enter_message(message: types.Message, state: FSMContext):
@@ -199,11 +205,49 @@ async def personal_menu(message: types.Message):
         await message.answer("Вы вернулись в главное меню")
         await AdminState.start.set()
     elif msg == AdminDatabaseMenuBtnName.get_admins:
-        pass
+        get_excel_from_db("admins")
+        await bot.send_document(
+            chat_id=message.from_user.id, document=types.InputFile("admins.xlsx")
+        )
     elif msg == AdminDatabaseMenuBtnName.add_admin:
-        pass
+        await message.answer("Введите Id и имя человека, которого нужно назначить админом в формате:"
+                             "\nID:ИМЯ\n\nПример:\n12345678:Иван",
+                             cancel())
+        await AdminState.enter_admin_id.set()
     elif msg == AdminDatabaseMenuBtnName.delete_admin:
-        pass
+        await message.answer("Введите Id админа, которого нужно удалить", cancel())
+        await AdminState.enter_admin_id_for_del.set()
+
+
+async def add_admin_menu(message: types.Message):
+    msg = message.text
+    if msg == CancelBtnName:
+        await message.answer("Вы отменили добавление администратора", reply_markup=personal_kb())
+    else:
+        data = msg.split(":")
+        id_ = data[0]
+        name = data[1]
+        try:
+            add_admin(telegram_id=id_, name=name)
+        except Exception as e:
+            logger.error(e)
+        await message.answer(f"Вы добавили администратора с id={id_} и именем {name}", reply_markup=personal_kb())
+    await AdminState.personal.set()
+
+
+async def delete_admin_menu(message: types.Message):
+    msg = message.text
+    if msg == CancelBtnName:
+        await message.answer("Вы отменили удаление админа", reply_markup=personal_kb())
+    else:
+        admin = get_admin_by_id(msg)
+        if admin is None:
+            await message.answer("Администратора с таким id не существует", reply_markup=personal_kb())
+        else:
+            delete_admin(telegram_id=msg)
+            await message.answer(f"Вы удалили администратора с id={admin.telegram_id} и именем {admin.name}",
+                                 reply_markup=personal_kb())
+    await AdminState.personal.set()
 
 
 async def answer_on_report(callback: types.CallbackQuery, state: FSMContext):

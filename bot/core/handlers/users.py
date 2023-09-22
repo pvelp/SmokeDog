@@ -2,7 +2,7 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from loguru import logger
 
-from bot.config import bot
+from bot.config import bot, storage
 from bot.core.consts import (
     CONTACTS,
     LATITUDE,
@@ -41,6 +41,7 @@ from bot.core.utils import get_admins_id
 
 
 async def start_command(message: types.Message):
+    await storage.set_state(user=message.chat.id, state=None)
     user = get_start_client_by_tg_id(message.from_user.id)
 
     if user is None:
@@ -63,6 +64,15 @@ async def become_admin(message: types.Message):
     if str(message.from_user.id) in admins_id:
         await message.answer("Вы вошли как админ", reply_markup=main_admin_kb())
         await AdminState.start.set()
+    else:
+        await message.answer("У вас нет доступа")
+
+
+async def become_user(message: types.Message):
+    admins_id = get_admins_id()
+    if str(message.chat.id) in admins_id:
+        await UserState.start.set()
+        await message.answer("Вы зашли как пользователь", reply_markup=main_menu_kb())
     else:
         await message.answer("У вас нет доступа")
 
@@ -297,7 +307,11 @@ async def enter_report_menu(message: types.Message):
 
 def register_users_handlers(dp: Dispatcher):
     dp.register_message_handler(become_admin, state="*", commands=["admin"])
-    dp.register_message_handler(start_command, commands=["start"], state=[None, *UserState.all_states, *AdminState.all_states])
+    dp.register_message_handler(
+        become_user, commands=["user"], state=[*AdminState.all_states]
+    )
+    dp.register_message_handler(start_command, commands=["start"], state=[None, *UserState.all_states,
+                                                                          *AdminState.all_states])
     dp.register_message_handler(main_menu_handler, state=UserState.start)
     dp.register_callback_query_handler(choose_day, state="*")
     dp.register_message_handler(report_menu, state=UserState.report)
