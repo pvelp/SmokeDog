@@ -4,7 +4,7 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from loguru import logger
 
-from bot.config import bot
+from bot.config import bot, storage
 from bot.core.db.admin_actions import add_admin, delete_admin, get_admin_by_id
 from bot.core.db.client_actions import (
     set_is_banned,
@@ -245,6 +245,7 @@ async def delete_admin_menu(message: types.Message):
             await message.answer("Администратора с таким id не существует", reply_markup=personal_kb())
         else:
             delete_admin(telegram_id=msg)
+            await storage.set_state(user=msg, state=None)
             await message.answer(f"Вы удалили администратора с id={admin.telegram_id} и именем {admin.name}",
                                  reply_markup=personal_kb())
     await AdminState.personal.set()
