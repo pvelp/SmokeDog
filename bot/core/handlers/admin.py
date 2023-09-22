@@ -202,7 +202,7 @@ async def enter_id_for_delete_user(message: types.Message):
 async def personal_menu(message: types.Message):
     msg = message.text
     if msg == back_btn:
-        await message.answer("Вы вернулись в главное меню")
+        await message.answer("Вы вернулись в главное меню", reply_markup=main_admin_kb())
         await AdminState.start.set()
     elif msg == AdminDatabaseMenuBtnName.get_admins:
         get_excel_from_db("admins")
