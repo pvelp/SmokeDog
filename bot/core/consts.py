@@ -21,4 +21,10 @@ MENU = "https://telegra.ph/Menyu-SmokeDog-09-07"
 
 YANDEX_MAP_URL = "https://yandex.ru/maps/org/smoke_dog/76863719030/reviews/?ll=37.624795%2C55.708881&z=16"
 
-PHOTO_URL = "https://disk.yandex.ru/d/6UClGbRELtnL9A"
+PHOTO_URL = "https://disk.yandex.ru/d/Oy3ZNGtQ260gDw"
+
+DEVELOPER_INFO = """
+BSC – разработчик IT продуктов для вашего бизнеса💻 
+📞 +7 (965) 340-17-02
+✉️ bussupcom@yandex.ru
+"""

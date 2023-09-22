@@ -13,6 +13,7 @@ class MainMenuBtnName:
     events = "💃🏻Афиша"
     feedback = "📢Оставить отзыв"
     contacts = "📞Контакты"
+    developer = "👨🏼‍💻О разработчике"
 
 
 class WeekendDayBtnName:
@@ -38,6 +39,7 @@ main_menu_btns = [
     MainMenuBtnName.events,
     MainMenuBtnName.feedback,
     MainMenuBtnName.contacts,
+    MainMenuBtnName.developer
 ]
 
 

@@ -308,7 +308,10 @@ async def enter_event_picture(message: types.Message, state: FSMContext):
     else:
         data = await state.get_data()
         day = data["day"]
-        text = data["text"]
+        try:
+            text = data["text"]
+        except Exception as e:
+            text = ""
         dest = f"sources/events/{day}.jpeg"
         video_dest = f"sources/events/{day}.mp4"
         try:

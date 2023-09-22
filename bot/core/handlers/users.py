@@ -11,6 +11,7 @@ from bot.core.consts import (
     MENU,
     YANDEX_MAP_URL,
     PHOTO_URL,
+    DEVELOPER_INFO,
 )
 from bot.core.db.client_actions import (
     update_client_by_tg_id,
@@ -235,7 +236,8 @@ async def main_menu_handler(message: types.Message):
             reply_markup=report_menu_kb(),
         )
         await UserState.report.set()
-
+    elif msg == MainMenuBtnName.developer:
+        await message.answer(text=DEVELOPER_INFO, reply_markup=main_menu_kb())
 
 async def choose_day(callback: types.CallbackQuery):
     day = WeekendBtnName.friday if WeekendBtnName.friday in callback.data else WeekendBtnName.saturday
