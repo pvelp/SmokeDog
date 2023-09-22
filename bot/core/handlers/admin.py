@@ -209,6 +209,7 @@ async def personal_menu(message: types.Message):
         await bot.send_document(
             chat_id=message.from_user.id, document=types.InputFile("admins.xlsx")
         )
+        os.remove("admins.xlsx")
     elif msg == AdminDatabaseMenuBtnName.add_admin:
         await message.answer("Введите Id и имя человека, которого нужно назначить админом в формате:"
                              "\nID:ИМЯ\n\nПример:\n12345678:Иван",

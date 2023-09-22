@@ -71,6 +71,7 @@ async def become_admin(message: types.Message):
 async def become_user(message: types.Message):
     admins_id = get_admins_id()
     if str(message.chat.id) in admins_id:
+        await storage.set_state(user=message.chat.id, state=None)
         await UserState.start.set()
         await message.answer("Вы зашли как пользователь", reply_markup=main_menu_kb())
     else:
