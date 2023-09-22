@@ -17,12 +17,12 @@ def add_event(day: str, text: str = None, media_path: str = None):
             logger.critical(e)
 
 
-def get_event_by_day(day: str) -> dict | None:
+def get_event_by_day(day: str):
     with get_session() as session:
         try:
             event = session.query(Event).filter(Event.day == day).first()
             return event.to_dict()
-        except TypeError as e:
+        except Exception as e:
             logger.error(f"{e}. Event in {day} not found")
             return None
 
