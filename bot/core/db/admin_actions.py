@@ -17,7 +17,7 @@ def get_all_admins():
 
 def get_admin_by_id(telegram_id: str):
     with get_session() as session:
-        admin = session.query(Admin).filter(Admin.telegram_id == telegram_id).firtst()
+        admin = session.query(Admin).filter(Admin.telegram_id == telegram_id).first()
         if admin is None:
             logger.error(f"Admin with telegram id = {telegram_id} was not found in DB")
             return None
