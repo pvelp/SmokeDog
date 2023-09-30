@@ -151,12 +151,12 @@ async def database_menu(message: types.Message):
         os.remove("users.xlsx")
     elif msg == DataBaseMenuBtnName.ban_client:
         await message.answer(
-            "Введите id клиента, которого необходимо заблокировать", cancel()
+            "Введите id клиента, которого необходимо заблокировать", reply_markup=cancel()
         )
         await AdminState.ban.set()
     elif msg == DataBaseMenuBtnName.delete_client:
         await message.answer(
-            "Введите id клиента, которого необходимо удалить", cancel()
+            "Введите id клиента, которого необходимо удалить", reply_markup=cancel()
         )
         await AdminState.delete_user.set()
 
@@ -213,10 +213,10 @@ async def personal_menu(message: types.Message):
     elif msg == AdminDatabaseMenuBtnName.add_admin:
         await message.answer("Введите Id и имя человека, которого нужно назначить админом в формате:"
                              "\nID:ИМЯ\n\nПример:\n12345678:Иван",
-                             cancel())
+                             reply_markup=cancel())
         await AdminState.enter_admin_id.set()
     elif msg == AdminDatabaseMenuBtnName.delete_admin:
-        await message.answer("Введите Id админа, которого нужно удалить", cancel())
+        await message.answer("Введите Id админа, которого нужно удалить", reply_markup=cancel())
         await AdminState.enter_admin_id_for_del.set()
 
 
