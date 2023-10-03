@@ -249,6 +249,100 @@ async def main_menu_handler(message: types.Message):
         await UserState.report.set()
     elif msg == MainMenuBtnName.developer:
         await message.answer(text=DEVELOPER_INFO, reply_markup=main_menu_kb())
+    elif msg == MainMenuBtnName.booking:
+        await message.answer("*Шаг [1/5]*\nВведите ваше имя", reply_markup=cancel(), parse_mode="Markdown")
+        await UserState.enter_name.set()
+
+
+async def enter_name_for_booking(message: types.Message, state: FSMContext):
+    msg = message.text
+    if msg == CancelBtnName.cancel_btn:
+        await message.answer("Вы отменили бронирование", reply_markup=main_menu_kb())
+        await UserState.start.set()
+        await state.reset_data()
+    else:
+        await message.answer(
+            "*Шаг [2/5]*\nПоделитесь номером телефона",
+            reply_markup=cancel_send_phone(),
+            parse_mode="Markdown",
+        )
+        await state.update_data(name=msg)
+        await state.update_data(telegram_link=f'tg://user?id={message.from_user.id}')
+        await UserState.enter_phone.set()
+
+
+async def cancel_enter_phone(message: types.Message, state: FSMContext):
+    msg = message.text
+    if msg == CancelBtnName.cancel_btn:
+        await message.answer("Вы отменили бронирование", reply_markup=main_menu_kb())
+        await UserState.start.set()
+        await state.reset_data()
+
+
+async def enter_phone(message: types.Message, state: FSMContext):
+    await state.update_data(phone=message.contact.phone_number)
+    await message.answer(
+        "*Шаг [3/5]*\nВведите количество гостей", reply_markup=cancel(), parse_mode="Markdown"
+    )
+    await UserState.enter_persons.set()
+
+
+async def enter_persons(message: types.Message, state: FSMContext):
+    msg = message.text
+    if msg == CancelBtnName.cancel_btn:
+        await message.answer("Вы отменили бронирование", reply_markup=main_menu_kb())
+        await UserState.start.set()
+        await state.reset_data()
+    else:
+        await message.answer(
+            "*Шаг [4/5]*\nУкажите дату, на которую нужно забронировать в формате: 01-01-2023",
+            reply_markup=cancel(),
+            parse_mode="Markdown",
+        )
+        await state.update_data(persons=msg)
+        await UserState.enter_date.set()
+
+
+async def enter_date(message: types.Message, state: FSMContext):
+    msg = message.text
+    if msg == CancelBtnName.cancel_btn:
+        await message.answer("Вы отменили бронирование", reply_markup=main_menu_kb())
+        await UserState.start.set()
+        await state.reset_data()
+    else:
+        await message.answer(
+            "*Шаг [5/5]*\nУкажите время, на которое нужно забронировать",
+            reply_markup=cancel(),
+            parse_mode="Markdown",
+        )
+        await state.update_data(date=msg)
+        await UserState.enter_time.set()
+
+
+async def enter_time(message: types.Message, state: FSMContext):
+    msg = message.text
+    if msg == CancelBtnName.cancel_btn:
+        await message.answer("Вы отменили бронирование", reply_markup=main_menu_kb())
+        await state.reset_data()
+    else:
+        await message.answer(
+            "*Ваша заявка принята!* Скоро с вами свяжется наш сотрудник!",
+            reply_markup=main_menu_kb(),
+            parse_mode="Markdown",
+        )
+        await state.update_data(time=msg)
+
+        data = await state.get_data()
+        booking_msg = (f"Имя: {data['name']}\n"
+                       f"Телефон: {data['phone']}\n"
+                       f"Гостей: {data['persons']}\n"
+                       f"Дата: {data['date']}\n"
+                       f"Время: {data['time']}\n"
+                       f"Ссылка: {data['telegram_link']}")
+        chat_id = "-950716402"
+        await bot.send_message(text=booking_msg, chat_id=chat_id)
+    await UserState.start.set()
+
 
 async def choose_day(callback: types.CallbackQuery):
     day = WeekendBtnName.friday if WeekendBtnName.friday in callback.data else WeekendBtnName.saturday
@@ -316,5 +410,11 @@ def register_users_handlers(dp: Dispatcher):
     dp.register_message_handler(main_menu_handler, state=UserState.start)
     dp.register_callback_query_handler(choose_day, state="*")
     dp.register_message_handler(report_menu, state=UserState.report)
+    dp.register_message_handler(enter_name_for_booking, state=UserState.enter_name)
+    dp.register_message_handler(cancel_enter_phone, state=UserState.enter_phone)
+    dp.register_message_handler(enter_phone, state=UserState.enter_phone)
+    dp.register_message_handler(enter_persons, state=UserState.enter_persons)
+    dp.register_message_handler(enter_date, state=UserState.enter_date)
+    dp.register_message_handler(enter_time, state=UserState.enter_time)
     dp.register_message_handler(enter_report_menu, state=UserState.enter_report)
 

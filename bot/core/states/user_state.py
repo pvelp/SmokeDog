@@ -9,6 +9,11 @@ class UserState(StatesGroup):
     choose_day = State()
     report = State()
     enter_report = State()
+    enter_name = State()
+    enter_phone = State()
+    enter_persons = State()
+    enter_date = State()
+    enter_time = State()
 
 
 class Registration(StatesGroup):

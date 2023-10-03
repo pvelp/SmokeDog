@@ -49,7 +49,7 @@ report_btns = [ReportBtnName.yandex, ReportBtnName.to_admin, back_btn]
 def main_menu_kb():
     return create_buttons(
         main_menu_btns,
-        {MainMenuBtnName.tips: TIPS_URL, MainMenuBtnName.booking: BOOKING_URL},
+        {MainMenuBtnName.tips: TIPS_URL},
     )
 
 
