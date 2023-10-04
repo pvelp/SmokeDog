@@ -337,10 +337,11 @@ async def enter_time(message: types.Message, state: FSMContext):
                        f"Телефон: {data['phone']}\n"
                        f"Гостей: {data['persons']}\n"
                        f"Дата: {data['date']}\n"
-                       f"Время: {data['time']}\n"
-                       f"Ссылка: {data['telegram_link']}")
+                       f"Время: {data['time']}")
+        markup = types.InlineKeyboardMarkup()
+        markup.row(types.InlineKeyboardButton(text='Ответить напрямую', url=data['telegram_link']))
         chat_id = "-950716402"
-        await bot.send_message(text=booking_msg, chat_id=chat_id)
+        await bot.send_message(text=booking_msg, chat_id=chat_id, reply_markup=markup)
     await UserState.start.set()
 
 

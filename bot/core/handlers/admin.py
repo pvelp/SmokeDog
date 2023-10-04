@@ -166,7 +166,7 @@ async def enter_id_for_banning(message: types.Message):
     if msg == CancelBtnName.cancel_btn:
         await message.answer(
             "Вы отменили ввод id пользователя для блокировки",
-            reply_markup=main_admin_kb(),
+            reply_markup=database_kb(),
         )
     else:
         set_is_banned(msg)
@@ -176,8 +176,8 @@ async def enter_id_for_banning(message: types.Message):
             f"{client.name}\nЮзернейм: {client.username}\nТелефон:"
             f" {client.phone}\nСтатус блокировки: {client.is_banned}"
         )
-        await message.answer(new_msg, reply_markup=main_admin_kb())
-    await AdminState.start.set()
+        await message.answer(new_msg, reply_markup=database_kb())
+    await AdminState.database.set()
 
 
 async def enter_id_for_delete_user(message: types.Message):
@@ -185,7 +185,7 @@ async def enter_id_for_delete_user(message: types.Message):
     if msg == CancelBtnName.cancel_btn:
         await message.answer(
             "Вы отменили ввод id пользователя для удаления",
-            reply_markup=main_admin_kb(),
+            reply_markup=database_kb(),
         )
     else:
         client = get_client_by_tg_id(telegram_id=msg)
@@ -195,8 +195,8 @@ async def enter_id_for_delete_user(message: types.Message):
             f" {client.phone}\nСтатус блокировки: {client.is_banned}"
         )
         delete_user_by_tg_id(msg)
-        await message.answer(new_msg, reply_markup=main_admin_kb())
-    await AdminState.start.set()
+        await message.answer(new_msg, reply_markup=database_kb())
+    await AdminState.database.set()
 
 
 async def personal_menu(message: types.Message):
@@ -222,23 +222,24 @@ async def personal_menu(message: types.Message):
 
 async def add_admin_menu(message: types.Message):
     msg = message.text
-    if msg == CancelBtnName:
+    if msg == CancelBtnName.cancel_btn:
         await message.answer("Вы отменили добавление администратора", reply_markup=personal_kb())
     else:
-        data = msg.split(":")
-        id_ = data[0]
-        name = data[1]
         try:
+            data = msg.split(":")
+            id_ = data[0]
+            name = data[1]
             add_admin(telegram_id=id_, name=name)
+            await message.answer(f"Вы добавили администратора с id={id_} и именем {name}", reply_markup=personal_kb())
         except Exception as e:
             logger.error(e)
-        await message.answer(f"Вы добавили администратора с id={id_} и именем {name}", reply_markup=personal_kb())
+            await message.answer("Невозможно добавить админа, обратитесь в поддержку", reply_markup=personal_kb())
     await AdminState.personal.set()
 
 
 async def delete_admin_menu(message: types.Message):
     msg = message.text
-    if msg == CancelBtnName:
+    if msg == CancelBtnName.cancel_btn:
         await message.answer("Вы отменили удаление админа", reply_markup=personal_kb())
     else:
         admin = get_admin_by_id(msg)
