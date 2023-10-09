@@ -38,7 +38,7 @@ async def main_admin_menu(message: types.Message):
     msg = message.text
     if msg == MainAdminMenuBtnName.events:
         await message.answer("Вы вошли в меню управления афишами", reply_markup=event_kb())
-        await AdminState.choose_event_date.set()
+        await AdminState.events.set()
     elif msg == MainAdminMenuBtnName.mailing:
         await message.answer(
             "*Шаг [1/2]*\nВведите ваше сообщение",

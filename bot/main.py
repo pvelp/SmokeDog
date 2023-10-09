@@ -8,7 +8,7 @@ from config import dp, loop
 
 sys.path.insert(0, '.')
 
-from settings import settings
+from bot.settings import settings
 from base.db_connection import set_settings_file_for_db
 from bot.core.handlers.users import register_users_handlers
 from bot.core.handlers.admin import register_admin_handlers

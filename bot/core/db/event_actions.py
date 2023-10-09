@@ -10,7 +10,7 @@ def add_event(date: str, text: str = None, media_path: str = None):
             event = Event()
             event.text = text
             event.media_path = media_path
-            event.date = date
+            event.day = date
             session.add(event)
             session.commit()
         except Exception as e:
@@ -20,7 +20,7 @@ def add_event(date: str, text: str = None, media_path: str = None):
 def get_event_by_date(date: str):
     with get_session() as session:
         try:
-            event = session.query(Event).filter(Event.date == date).first()
+            event = session.query(Event).filter(Event.day == date).first()
             return event.to_dict()
         except Exception as e:
             logger.error(f"{e}. Event in {date} not found")
@@ -29,7 +29,7 @@ def get_event_by_date(date: str):
 
 def delete_event_by_date(date: str):
     with get_session() as session:
-        event = session.query(Event).filter(Event.date == date).first()
+        event = session.query(Event).filter(Event.day == date).first()
 
         if event is not None:
             session.delete(event)
