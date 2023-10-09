@@ -4,7 +4,7 @@ from bot.core.keyboards.utils import create_buttons
 
 class MainAdminMenuBtnName:
     mailing = "Рассылка"
-    events = "Изменить афишу"
+    events = "Афиши"
     database = "База клиентов"
     personal = "Персонал"
 
@@ -25,6 +25,11 @@ class WeekendBtnName:
     friday = "Пятница"
     saturday = "Суббота"
 
+
+class EventBtnName:
+    create = "Создать афишу"
+    delete = "Удалить афишу"
+    get = "Получить афишу"
 
 
 main_admin_menu_btns = [
@@ -57,6 +62,14 @@ weekend_btns = [
 ]
 
 
+event_btns = [
+    EventBtnName.create,
+    EventBtnName.delete,
+    EventBtnName.get,
+    back_btn
+]
+
+
 def main_admin_kb():
     return create_buttons(main_admin_menu_btns)
 
@@ -71,3 +84,7 @@ def personal_kb():
 
 def weekend_kb():
     return create_buttons(weekend_btns)
+
+
+def event_kb():
+    return create_buttons(event_btns)

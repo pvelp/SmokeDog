@@ -18,18 +18,16 @@ from bot.core.db.client_actions import (
     get_start_client_by_tg_id,
     add_client,
 )
-from bot.core.db.event_actions import get_event_by_day
+from bot.core.db.event_actions import get_event_by_date
 from bot.core.keyboards.admin_keyboards.admin_keyboard import (
     main_admin_kb,
-    WeekendBtnName,
 )
 from bot.core.keyboards.cancel_keyboard import cancel, cancel_send_phone, CancelBtnName
 from bot.core.keyboards.user_keyboards.user_keyboard import (
     main_menu_kb,
     MainMenuBtnName,
     LoyaltyProgramBtnName,
-    choose_weekend_day_kb,
-    WeekendDayBtnName,
+    choose_date_kb,
     report_menu_kb,
     back_btn,
     ReportBtnName,
@@ -72,8 +70,8 @@ async def become_user(message: types.Message):
     admins_id = get_admins_id()
     if str(message.chat.id) in admins_id:
         await storage.set_state(user=message.chat.id, state=None)
-        await UserState.start.set()
         await message.answer("Вы зашли как пользователь", reply_markup=main_menu_kb())
+        await UserState.start.set()
     else:
         await message.answer("У вас нет доступа")
 
@@ -228,7 +226,11 @@ async def main_menu_handler(message: types.Message):
     elif msg == MainMenuBtnName.sales:
         await message.answer(SALES, reply_markup=main_menu_kb())
     elif msg == MainMenuBtnName.events:
-        await message.answer("Выберите день", reply_markup=choose_weekend_day_kb())
+        kb = choose_date_kb()
+        if kb is not None:
+            await message.answer("Выберите дату", reply_markup=choose_date_kb())
+        else:
+            await message.answer("Информация о мероприятиях скоро появится!🥰")
     elif msg == MainMenuBtnName.photos:
         await message.answer(
             f"Фотографии с наших мероприятий!❤️\n\n{PHOTO_URL}",
@@ -345,30 +347,52 @@ async def enter_time(message: types.Message, state: FSMContext):
     await UserState.start.set()
 
 
-async def choose_day(callback: types.CallbackQuery):
-    day = WeekendBtnName.friday if WeekendBtnName.friday in callback.data else WeekendBtnName.saturday
-    event = get_event_by_day(day)
-    if event is not None:
-        if event["text"] is None:
-            text = "Афиша скоро будет опубликована🤩"
-        else:
-            text = event["text"]
+# async def choose_day(callback: types.CallbackQuery):
+#     day = WeekendBtnName.friday if WeekendBtnName.friday in callback.data else WeekendBtnName.saturday
+#     event = get_event_by_date(day)
+#     if event is not None:
+#         if event["text"] is None:
+#             text = "Афиша скоро будет опубликована🤩"
+#         else:
+#             text = event["text"]
+#
+#         if event["media"] is None:
+#             await bot.send_message(chat_id=callback.message.chat.id, text=text)
+#         if "jpeg" in event["media"]:
+#             await bot.send_photo(
+#                 chat_id=callback.message.chat.id,
+#                 photo=types.InputFile(event["media"]),
+#                 caption=text,
+#             )
+#         if "mp4" in event["media"]:
+#             await bot.send_video(chat_id=callback.message.chat.id,
+#                                 video=types.InputFile(event["media"]),
+#                                 caption=text)
+#     else:
+#         await callback.message.answer("Афиша на этот день пока еще не выложена🥹")
+#     await callback.answer("")
 
-        if event["media"] is None:
-            await bot.send_message(chat_id=callback.message.chat.id, text=text)
-        if "jpeg" in event["media"]:
-            await bot.send_photo(
-                chat_id=callback.message.chat.id,
-                photo=types.InputFile(event["media"]),
-                caption=text,
-            )
-        if "mp4" in event["media"]:
-            await bot.send_video(chat_id=callback.message.chat.id,
-                                video=types.InputFile(event["media"]),
-                                caption=text)
+
+async def choose_date(callback: types.CallbackQuery):
+    data = callback.data.split("_")
+    date = data[1]
+    event = get_event_by_date(date)
+    if event["text"] is None:
+        text = ""
     else:
-        await callback.message.answer("Афиша на этот день пока еще не выложена🥹")
-    await callback.answer("")
+        text = event["text"]
+    if event["media"] is None:
+        await bot.send_message(chat_id=callback.message.chat.id, text=text)
+    if "jpeg" in event["media"]:
+        await bot.send_photo(
+            chat_id=callback.message.chat.id,
+            photo=types.InputFile(event["media"]),
+            caption=text,
+        )
+    if "mp4" in event["media"]:
+        await bot.send_video(chat_id=callback.message.chat.id,
+                             video=types.InputFile(event["media"]),
+                             caption=text)
 
 
 async def report_menu(message: types.Message):
@@ -409,7 +433,7 @@ def register_users_handlers(dp: Dispatcher):
     dp.register_message_handler(start_command, commands=["start"], state=[None, *UserState.all_states,
                                                                           *AdminState.all_states])
     dp.register_message_handler(main_menu_handler, state=UserState.start)
-    dp.register_callback_query_handler(choose_day, state="*")
+    dp.register_callback_query_handler(choose_date, state="*")
     dp.register_message_handler(report_menu, state=UserState.report)
     dp.register_message_handler(enter_name_for_booking, state=UserState.enter_name)
     dp.register_message_handler(enter_phone, state=UserState.enter_phone, content_types=types.ContentType.CONTACT)
@@ -418,4 +442,3 @@ def register_users_handlers(dp: Dispatcher):
     dp.register_message_handler(enter_date, state=UserState.enter_date)
     dp.register_message_handler(enter_time, state=UserState.enter_time)
     dp.register_message_handler(enter_report_menu, state=UserState.enter_report)
-

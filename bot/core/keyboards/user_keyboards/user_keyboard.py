@@ -1,4 +1,5 @@
 from bot.core.consts import TIPS_URL, BOOKING_URL
+from bot.core.db.event_actions import get_events
 from bot.core.keyboards.cancel_keyboard import CancelBtnName, back_btn
 from bot.core.keyboards.utils import create_buttons, create_inline_buttons
 
@@ -53,8 +54,15 @@ def main_menu_kb():
     )
 
 
-def choose_weekend_day_kb():
-    return create_inline_buttons([WeekendDayBtnName.friday, WeekendDayBtnName.saturday])
+def choose_date_kb():
+    events = get_events()
+    dates = []
+    for event in events:
+        dates.append("date_"+event["date"])
+    if len(dates) == 0:
+        return create_inline_buttons(dates)
+    else:
+        return None
 
 
 def report_menu_kb():

@@ -49,7 +49,7 @@ class Event(Base):
     id = Column(Integer(), primary_key=True)
     text = Column(Text(), nullable=True)
     media_path = Column(Text, nullable=True)
-    day = Column(Text, nullable=False)
+    date = Column(Text, nullable=False)
 
     def to_dict(self):
-        return {"text": self.text, "media": self.media_path}
+        return {"text": self.text, "media": self.media_path, "date": self.date}
