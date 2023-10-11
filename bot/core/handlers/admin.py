@@ -2,6 +2,7 @@ import os
 
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters import Text
 from loguru import logger
 
 from bot.config import bot, storage
@@ -321,6 +322,7 @@ async def event_menu(message: types.Message):
         await message.answer("Введите дату афиши, которую надо удалить, в формате:\n01-01-2023", reply_markup=cancel())
         await AdminState.delete_event.set()
     elif msg == EventBtnName.get:
+        # await AdminState.choose_event.set()
         kb = choose_date_kb()
         if kb is not None:
             await message.answer("Выберите дату", reply_markup=choose_date_kb())
@@ -461,6 +463,7 @@ async def choose_date(callback: types.CallbackQuery):
         await bot.send_video(chat_id=callback.message.chat.id,
                              video=types.InputFile(event["media"]),
                              caption=text)
+    await callback.answer("")
 
 
 def register_admin_handlers(dp: Dispatcher):
@@ -476,7 +479,7 @@ def register_admin_handlers(dp: Dispatcher):
     dp.register_message_handler(enter_id_for_delete_user, state=AdminState.delete_user)
     dp.register_message_handler(add_admin_menu, state=AdminState.enter_admin_id)
     dp.register_message_handler(delete_admin_menu, state=AdminState.enter_admin_id_for_del)
-    dp.register_callback_query_handler(answer_on_report, state=[*AdminState.all_states])
+    dp.register_callback_query_handler(answer_on_report, Text(startswith=["report_", "complete_"]),state=[*AdminState.all_states])
     dp.register_message_handler(
         enter_msg_for_answer_support, state=AdminState.enter_support_message
     )
@@ -486,4 +489,4 @@ def register_admin_handlers(dp: Dispatcher):
     dp.register_message_handler(enter_event_picture, state=AdminState.enter_event_picture, content_types=["photo"])
     dp.register_message_handler(enter_event_video, state=AdminState.enter_event_picture, content_types=["video"])
     dp.register_message_handler(delete_event, state=AdminState.delete_event)
-    dp.register_callback_query_handler(choose_date, state="*")
+    dp.register_callback_query_handler(choose_date, Text(startswith=["date_"]), state="*")

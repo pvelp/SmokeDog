@@ -17,3 +17,4 @@ class AdminState(StatesGroup):
     enter_admin_id_for_del = State()
     events = State()
     delete_event = State()
+    choose_event = State()

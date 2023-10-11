@@ -57,10 +57,13 @@ def main_menu_kb():
 def choose_date_kb():
     events = get_events()
     dates = []
+
     for event in events:
-        dates.append("date_"+event["date"])
-    if len(dates) == 0:
-        return create_inline_buttons(dates)
+        dates.append(event["date"])
+        
+    if len(dates) != 0:
+        callbacks = [f"date_{date}" for date in dates]
+        return create_inline_buttons(dates, callback=callbacks)
     else:
         return None
 
